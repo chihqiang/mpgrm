@@ -7,6 +7,7 @@ import (
 )
 
 const (
+	ApiURL      = "https://gitea.com"
 	HOST        = "gitea.com"
 	EnvPrefix   = "GITEA"
 	EnvUsername = EnvPrefix + credential.EnvUsernameSuffix
@@ -15,6 +16,7 @@ const (
 
 type Platform struct {
 	Credential *credential.Credential
+	ApiURL     string
 }
 
 func (p *Platform) WithCredential(credential *credential.Credential) error {
@@ -25,8 +27,8 @@ func (p *Platform) WithCredential(credential *credential.Credential) error {
 	return nil
 }
 func (p *Platform) GetClient() (*gitea.Client, error) {
-	if p.Credential.ApiURL == "" {
-		p.Credential.ApiURL = "https://gitea.com"
+	if p.ApiURL == "" {
+		p.ApiURL = ApiURL
 	}
-	return gitea.NewClient(p.Credential.ApiURL, gitea.SetToken(p.Credential.Username))
+	return gitea.NewClient(p.ApiURL, gitea.SetToken(p.Credential.Username))
 }

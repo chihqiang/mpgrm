@@ -3,6 +3,7 @@ package register
 import (
 	"encoding/json"
 	"github.com/urfave/cli/v3"
+	"net/url"
 	"os"
 	"wangzhiqiang/mpgrm/flags"
 	"wangzhiqiang/mpgrm/pkg/platforms"
@@ -12,37 +13,63 @@ import (
 	"wangzhiqiang/mpgrm/pkg/platforms/github"
 )
 
-func Platforms(cmd *cli.Command) {
-	// 官方域名 -> 注册逻辑
-	defaults := map[string]func(string){
-		cnb.HOST: func(d string) {
-			platforms.Register(d, cnb.EnvPrefix, func() platforms.IPlatform { return &cnb.Platform{} })
-		},
-		gitea.HOST: func(d string) {
-			platforms.Register(d, gitea.EnvPrefix, func() platforms.IPlatform { return &gitea.Platform{} })
-		},
-		gitee.HOST: func(d string) {
-			platforms.Register(d, gitee.EnvPrefix, func() platforms.IPlatform { return &gitee.Platform{} })
-		},
-		github.HOST: func(d string) {
-			platforms.Register(d, github.EnvPrefix, func() platforms.IPlatform { return &github.Platform{} })
-		},
-	}
+type HostPlatform struct {
+	Host   string `json:"host"`
+	ApiURL string `json:"api_url"`
+}
 
-	// 注册默认域名
-	for domain, fn := range defaults {
-		fn(domain)
+// 平台注册信息
+type platformConfig struct {
+	EnvPrefix string
+	Factory   func(apiURL string) platforms.IPlatform
+}
+
+// 所有支持的平台配置
+var platformConfigs = map[string]platformConfig{
+	cnb.HOST: {
+		EnvPrefix: cnb.EnvPrefix,
+		Factory:   func(apiURL string) platforms.IPlatform { return &cnb.Platform{ApiURL: apiURL} },
+	},
+	gitea.HOST: {
+		EnvPrefix: gitea.EnvPrefix,
+		Factory:   func(apiURL string) platforms.IPlatform { return &gitea.Platform{ApiURL: apiURL} },
+	},
+	gitee.HOST: {
+		EnvPrefix: gitee.EnvPrefix,
+		Factory:   func(apiURL string) platforms.IPlatform { return &gitee.Platform{ApiURL: apiURL} },
+	},
+	github.HOST: {
+		EnvPrefix: github.EnvPrefix,
+		Factory:   func(apiURL string) platforms.IPlatform { return &github.Platform{ApiURL: apiURL} },
+	},
+}
+
+func Platforms(cmd *cli.Command) {
+	// 注册默认平台
+	for host, cfg := range platformConfigs {
+		registerPlatform(host, "", cfg)
 	}
 
 	// 尝试加载自定义配置
 	if data, err := os.ReadFile(cmd.String(flags.FlagsPlatforms)); err == nil {
-		var mapping map[string]string
-		if json.Unmarshal(data, &mapping) == nil {
-			for custom, official := range mapping {
-				if fn, ok := defaults[official]; ok {
-					fn(custom)
+		var mapping []HostPlatform
+		if err := json.Unmarshal(data, &mapping); err == nil {
+			for _, hp := range mapping {
+				apiURL, err := url.Parse(hp.ApiURL)
+				if err != nil {
+					continue
+				}
+				if cfg, ok := platformConfigs[apiURL.Host]; ok {
+					registerPlatform(apiURL.Host, apiURL.String(), cfg)
 				}
 			}
 		}
 	}
+}
+
+// 注册逻辑
+func registerPlatform(host, apiURL string, cfg platformConfig) {
+	platforms.Register(host, cfg.EnvPrefix, func() platforms.IPlatform {
+		return cfg.Factory(apiURL)
+	})
 }

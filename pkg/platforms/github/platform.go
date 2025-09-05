@@ -17,6 +17,7 @@ const (
 
 type Platform struct {
 	Credential *credential.Credential
+	ApiURL     string
 }
 
 func (p *Platform) GetClient(ctx context.Context) *github.Client {

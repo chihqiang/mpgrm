@@ -28,7 +28,6 @@ type IFormToCredential interface {
 type Credential struct {
 	Username string // 用户名或 git
 	Token    string // 认证令牌（Token）
-	ApiURL   string //请求接口
 	CloneURL string // clone URL
 }
 

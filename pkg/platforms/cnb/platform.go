@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	baseApiURL  = "https://api.cnb.cool"
+	ApiURL      = "https://api.cnb.cool"
 	user        = "cnb"
 	downloadURL = "https://cnb.cool"
 	cloneURL    = "https://cnb.cool"
@@ -25,6 +25,7 @@ const (
 
 type Platform struct {
 	Credential *credential.Credential
+	ApiURL     string
 }
 
 func (p *Platform) WithCredential(credential *credential.Credential) error {
@@ -36,8 +37,8 @@ func (p *Platform) WithCredential(credential *credential.Credential) error {
 }
 
 func (p *Platform) GetClient() (*cnb.Client, error) {
-	if p.Credential.ApiURL == "" {
-		p.Credential.ApiURL = baseApiURL
+	if p.ApiURL == "" {
+		p.ApiURL = ApiURL
 	}
-	return cnb.NewClient(nil).WithAuthToken(p.Credential.Token).WithURLs(p.Credential.ApiURL)
+	return cnb.NewClient(nil).WithAuthToken(p.Credential.Token).WithURLs(p.ApiURL)
 }

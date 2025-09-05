@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	baseURL = "https://gitee.com/api/v5/"
+	ApiURL = "https://gitee.com/api/v5/"
 )
 
 const (
@@ -19,6 +19,7 @@ const (
 
 type Platform struct {
 	Credential *credential.Credential
+	ApiURL     string
 }
 
 func (p *Platform) WithCredential(credential *credential.Credential) error {
@@ -31,7 +32,10 @@ func (p *Platform) WithCredential(credential *credential.Credential) error {
 
 // GetURLWithToken 构建带 Token 和额外 query 参数的完整 API URL
 func (p *Platform) GetURLWithToken(route string, query map[string]string) string {
-	base, err := url.Parse(baseURL)
+	if p.ApiURL == "" {
+		p.ApiURL = ApiURL
+	}
+	base, err := url.Parse(p.ApiURL)
 	if err != nil {
 		return ""
 	}
