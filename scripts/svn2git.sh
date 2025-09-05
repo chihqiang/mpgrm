@@ -56,17 +56,23 @@ error() {
 # -----------------------------
 check_dependencies() {
     info "Checking required dependencies..."
-    local dependencies=("git" "svn" "git-svn")
 
-    for cmd in "${dependencies[@]}"; do
+    # 检查 git 和 svn
+    for cmd in git svn; do
         if ! command -v "$cmd" &>/dev/null; then
             error "$cmd not detected, please install it first."
-            echo "Ubuntu/Debian: sudo apt install git-svn subversion"
-            echo "CentOS/RHEL : sudo yum install git git-svn subversion"
-            echo "macOS       : brew install git-svn subversion"
+            echo "Ubuntu/Debian: sudo apt install git subversion git-svn"
+            echo "CentOS/RHEL : sudo yum install git subversion git-svn"
+            echo "macOS       : brew install git svn"
             exit 1
         fi
     done
+
+    # 检查 git-svn 是否可用
+    if ! git svn --version &>/dev/null; then
+        error "git-svn plugin not available. Please install git-svn."
+        exit 1
+    fi
     success "All required dependencies are installed"
 }
 
