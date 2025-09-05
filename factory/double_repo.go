@@ -6,10 +6,9 @@ import (
 	"github.com/urfave/cli/v3"
 	"log"
 	"time"
-	flags2 "wangzhiqiang/mpgrm/flags"
+	"wangzhiqiang/mpgrm/flags"
 	"wangzhiqiang/mpgrm/pkg/credential"
 	"wangzhiqiang/mpgrm/pkg/platforms"
-	"wangzhiqiang/mpgrm/pkg/x"
 )
 
 // DoubleRepo represents a repository sync context between a source and a target repository.
@@ -33,7 +32,7 @@ func NewDoubleRepo(ctx context.Context, cmd *cli.Command) (*DoubleRepo, error) {
 	rt := &DoubleRepo{ctx: ctx, cmd: cmd}
 
 	// Get source repository URL and credential
-	repoURL, cred, err := flags2.GetFormCredential(cmd, true)
+	repoURL, cred, err := flags.GetFormCredential(cmd, true)
 	if err != nil {
 		return rt, err
 	}
@@ -45,23 +44,22 @@ func NewDoubleRepo(ctx context.Context, cmd *cli.Command) (*DoubleRepo, error) {
 		return rt, err
 	}
 	rt.platform = platform
-
 	// Parse source repository full name
-	fullName, err := x.RepoURLParseFullName(repoURL)
+	fullName, err := cred.GetFullName()
 	if err != nil {
 		return rt, err
 	}
 	rt.fullName = fullName
 
 	// Get target repository URL and credential
-	targetRepoURL, targetCred, err := flags2.GetTargetCredential(cmd)
+	targetRepoURL, targetCred, err := flags.GetTargetCredential(cmd)
 	if err != nil {
 		return rt, err
 	}
 	rt.targetCredential = targetCred
 
 	// Parse target repository full name
-	targetFullName, err := x.RepoURLParseFullName(targetRepoURL)
+	targetFullName, err := targetCred.GetFullName()
 	if err != nil {
 		return rt, err
 	}
@@ -89,7 +87,7 @@ func (t *DoubleRepo) ReleaseSync(tags []string) error {
 		return fmt.Errorf("no tags provided for release sync")
 	}
 
-	workspace, err := t.credential.GetCategoryNamWorkspace(credential.WorkspaceCategoryReleases, flags2.GetWorkspace(t.cmd))
+	workspace, err := t.credential.GetCategoryNamWorkspace(credential.WorkspaceCategoryReleases, flags.GetWorkspace(t.cmd))
 	if err != nil {
 		return fmt.Errorf("failed to create workspace: %w", err)
 	}

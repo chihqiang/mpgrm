@@ -47,7 +47,7 @@ func NewRepo(ctx context.Context, cmd *cli.Command) (*Repo, error) {
 	rt.platform = platform // Assign platform
 
 	// Parse the full name of the repository (format: owner/repo or owner/repo/subdir)
-	fullName, err := x.RepoURLParseFullName(repoURL)
+	fullName, err := cred.GetFullName()
 	if err != nil {
 		return rt, err
 	}
@@ -183,8 +183,7 @@ func (r *Repo) RepoSync() error {
 				return
 			}
 			log.Printf("Git instance created for %s", repo.Name)
-			targetRepo, _ := url.Parse(targetRepoURL)
-			targetFullName, _ := x.RepoURLParseFullName(targetRepo)
+			targetFullName, _ := targetCredential.GetFullName()
 			detail, err := targetPlatform.GetRepoDetail(r.ctx, targetFullName)
 			if err != nil || detail.ID == 0 {
 				log.Printf("Target repository %s does not exist or cannot be fetched, creating...", repo.Name)

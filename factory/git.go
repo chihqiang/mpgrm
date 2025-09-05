@@ -5,12 +5,10 @@ import (
 	"fmt"
 	"github.com/urfave/cli/v3"
 	"log"
-	"net/url"
 	"time"
 	"wangzhiqiang/mpgrm/flags"
 	"wangzhiqiang/mpgrm/pkg/credential"
 	"wangzhiqiang/mpgrm/pkg/gitx"
-	"wangzhiqiang/mpgrm/pkg/x"
 )
 
 type Git struct {
@@ -38,27 +36,15 @@ func NewDoubleCredentialGit(cmd *cli.Command, credential *credential.Credential,
 		targetCredential: targetCredential,        // Target repository credential
 	}
 
-	// Parse source repository URL
-	repoURL, err := url.Parse(credential.CloneURL)
-	if err != nil {
-		return rt, err
-	}
-
 	// Parse full name of the source repository (format: owner/repo or owner/repo/subdir)
-	fullName, err := x.RepoURLParseFullName(repoURL)
+	fullName, err := credential.GetFullName()
 	if err != nil {
 		return rt, err
 	}
 	rt.fullName = fullName
 
-	// Parse target repository URL
-	targetURL, err := url.Parse(targetCredential.CloneURL)
-	if err != nil {
-		return rt, err
-	}
-
 	// Parse full name of the target repository
-	targetFullName, err := x.RepoURLParseFullName(targetURL)
+	targetFullName, err := targetCredential.GetFullName()
 	if err != nil {
 		return rt, err
 	}
@@ -76,14 +62,8 @@ func NewCredentialGit(cmd *cli.Command, credential *credential.Credential) (*Git
 		tags:       flags.GetTags(cmd),      // Tags to operate on
 		credential: credential,              // Source repository credential
 	}
-	// Parse source repository URL
-	repoURL, err := url.Parse(credential.CloneURL)
-	if err != nil {
-		return rt, err
-	}
-
 	// Parse full name of the source repository (format: owner/repo or owner/repo/subdir)
-	fullName, err := x.RepoURLParseFullName(repoURL)
+	fullName, err := credential.GetFullName()
 	if err != nil {
 		return rt, err
 	}
@@ -104,25 +84,24 @@ func NewCmdDoubleGit(ctx context.Context, cmd *cli.Command) (*Git, error) {
 	}
 
 	// Get source repository URL and credentials from CLI flags
-	repoURL, cred, _ := flags.GetFormCredential(cmd, false)
+	_, cred, _ := flags.GetFormCredential(cmd, false)
 	rt.credential = cred // Assign source repository credential
-
 	// Parse the full name of the source repository (format: owner/repo or owner/repo/subdir)
-	fullName, err := x.RepoURLParseFullName(repoURL)
+	fullName, err := cred.GetFullName()
 	if err != nil {
 		return rt, err
 	}
 	rt.fullName = fullName // Assign parsed full name
 
 	// Get target repository URL and credentials from CLI flags
-	targetRepoURL, targetCred, err := flags.GetTargetCredential(cmd)
+	_, targetCred, err := flags.GetTargetCredential(cmd)
 	if err != nil {
 		return rt, err
 	}
 	rt.targetCredential = targetCred // Assign target repository credential
 
 	// Parse the full name of the target repository (format: owner/repo or owner/repo/subdir)
-	targetFullName, err := x.RepoURLParseFullName(targetRepoURL)
+	targetFullName, err := targetCred.GetFullName()
 	if err != nil {
 		return rt, err
 	}

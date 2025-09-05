@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"wangzhiqiang/mpgrm/pkg/x"
 )
 
 // WorkspaceCategory 表示 workspace 下的分类/命名空间层级
@@ -36,28 +37,11 @@ func (c *Credential) GetFullName() (string, error) {
 	if c.CloneURL == "" {
 		return "", nil // 如果 CloneURL 为空，直接返回空字符串
 	}
-
-	var pathPart string
-	if strings.HasPrefix(c.CloneURL, "http://") || strings.HasPrefix(c.CloneURL, "https://") {
-		// HTTPS URL: https://github.com/owner/repo.git
-		u, err := url.Parse(c.CloneURL)
-		if err != nil {
-			return "", err // 解析 URL 出错
-		}
-		pathPart = strings.TrimPrefix(u.Path, "/") // 去掉开头的 /
-	} else if strings.HasPrefix(c.CloneURL, "git@") {
-		// SSH URL: git@github.com:owner/repo.git
-		parts := strings.SplitN(c.CloneURL, ":", 2)
-		if len(parts) != 2 {
-			return "", fmt.Errorf("invalid SSH clone URL: %s", c.CloneURL)
-		}
-		pathPart = parts[1]
-	} else {
-		return "", fmt.Errorf("unsupported clone URL format: %s", c.CloneURL)
+	parse, err := url.Parse(c.CloneURL)
+	if err != nil {
+		return "", err
 	}
-	// 去掉尾部的 .git（如果有）
-	pathPart = strings.TrimSuffix(pathPart, ".git")
-	return pathPart, nil
+	return x.RepoURLParseFullName(parse)
 }
 
 func (c *Credential) GetCategoryNamWorkspace(category WorkspaceCategory, workspace string) (string, error) {
