@@ -47,11 +47,11 @@ func (ri *ReleaseInfo) Download(workspace string) ([]string, error) {
 	for _, asset := range ri.Assets {
 		asset := asset
 		g.Go(func() error {
+			mu.Lock()
 			localFile := path.Join(workspace, ri.TagName, asset.Name)
 			if err := httpx.Download(ctx, asset.URL, localFile); err != nil {
 				return fmt.Errorf("failed to download %s: %w", asset.URL, err)
 			}
-			mu.Lock()
 			localFileNames = append(localFileNames, localFile)
 			mu.Unlock()
 			return nil

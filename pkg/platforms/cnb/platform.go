@@ -12,6 +12,11 @@ const (
 	downloadURL = "https://cnb.cool"
 	cloneURL    = "https://cnb.cool"
 )
+
+const (
+	HOST = "cnb.cool"
+)
+
 const (
 	EnvPrefix   = "CNB"
 	EnvUsername = EnvPrefix + credential.EnvUsernameSuffix

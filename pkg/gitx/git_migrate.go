@@ -17,11 +17,15 @@ type GitMigrate struct {
 	toAuth   *http.BasicAuth
 }
 
-// NewGitMigrate 创建 GitMigrate 实例并初始化认证
-func NewGitMigrate(from, target *credential.Credential) *GitMigrate {
-	m := &GitMigrate{}
+// NewGitMigrateDouble 创建 GitMigrate 实例并初始化认证
+func NewGitMigrateDouble(from, target *credential.Credential) *GitMigrate {
+	m := NewGitMigrate()
 	m.WithForm(from)
 	m.WithTarget(target)
+	return m
+}
+func NewGitMigrate() *GitMigrate {
+	m := &GitMigrate{}
 	return m
 }
 

@@ -17,21 +17,26 @@ const (
 	FlagsFiles    = "files"
 )
 
+// FormTargetRelease combines all flags needed for release operations.
 func FormTargetRelease() []cli.Flag {
 	var flag []cli.Flag
-	flag = append(flag, FormTargetFlags()...)
-	flag = append(flag, BranchFlags()...)
-	flag = append(flag, TagsFlags()...)
-	flag = append(flag, FilesFlags()...)
+	flag = append(flag, FormTargetFlags()...) // source and target repo flags
+	flag = append(flag, BranchFlags()...)     // branch selection
+	flag = append(flag, TagsFlags()...)       // tag selection
+	flag = append(flag, FilesFlags()...)      // files selection
 	return flag
 }
+
+// FormTargetRepo combines flags needed for repository operations.
 func FormTargetRepo() []cli.Flag {
 	var flag []cli.Flag
-	flag = append(flag, FormTargetFlags()...)
-	flag = append(flag, BranchFlags()...)
-	flag = append(flag, TagsFlags()...)
+	flag = append(flag, FormTargetFlags()...) // source and target repo flags
+	flag = append(flag, BranchFlags()...)     // branch selection
+	flag = append(flag, TagsFlags()...)       // tag selection
 	return flag
 }
+
+// FormTargetFlags returns source and target repository URL flags.
 func FormTargetFlags() []cli.Flag {
 	return []cli.Flag{
 		&cli.StringFlag{
@@ -44,15 +49,18 @@ func FormTargetFlags() []cli.Flag {
 		},
 	}
 }
+
+// BranchFlags returns branch selection flag.
 func BranchFlags() []cli.Flag {
 	return []cli.Flag{
 		&cli.StringSliceFlag{
 			Name:  FlagsBranches,
-			Usage: "Branches at your cmd, releases under your control",
+			Usage: "Branches at your command, releases under your control",
 		},
 	}
 }
 
+// TagsFlags returns tag selection flag.
 func TagsFlags() []cli.Flag {
 	return []cli.Flag{
 		&cli.StringSliceFlag{
@@ -62,6 +70,7 @@ func TagsFlags() []cli.Flag {
 	}
 }
 
+// FilesFlags returns file selection flag.
 func FilesFlags() []cli.Flag {
 	return []cli.Flag{
 		&cli.StringSliceFlag{
@@ -71,6 +80,12 @@ func FilesFlags() []cli.Flag {
 	}
 }
 
+// GetFormCredential retrieves the repository URL and credential from the command.
+// If readEnv is true, it will also try to read credentials from environment variables.
+// Returns:
+//   - *url.URL: parsed repository URL
+//   - *credential.Credential: credential object
+//   - error: any parsing or credential error
 func GetFormCredential(cmd *cli.Command, readEnv bool) (*url.URL, *credential.Credential, error) {
 	repoURL, err := url.Parse(cmd.String(FlagsFormRepo))
 	if err != nil {
@@ -79,6 +94,13 @@ func GetFormCredential(cmd *cli.Command, readEnv bool) (*url.URL, *credential.Cr
 	cred, err := credential.GetCredential(repoURL, cmd.String(FlagsFormUsername), cmd.String(FlagsFormToken), readEnv)
 	return repoURL, cred, err
 }
+
+// GetTargetCredential retrieves the target repository URL and credential from the command.
+// Always reads credentials from environment variables.
+// Returns:
+//   - *url.URL: parsed target repository URL
+//   - *credential.Credential: credential object
+//   - error: any parsing or credential error
 func GetTargetCredential(cmd *cli.Command) (*url.URL, *credential.Credential, error) {
 	repoURL, err := url.Parse(cmd.String(FlagsTargetRepo))
 	if err != nil {
@@ -88,13 +110,20 @@ func GetTargetCredential(cmd *cli.Command) (*url.URL, *credential.Credential, er
 	return repoURL, cred, err
 }
 
+// GetBranches returns a slice of branch names specified in the command flags.
+// Branch names are split by comma.
 func GetBranches(cmd *cli.Command) []string {
 	return x.StringSplits(cmd.StringSlice(FlagsBranches), ",")
 }
 
+// GetTags returns a slice of tag names specified in the command flags.
+// Tag names are split by comma.
 func GetTags(cmd *cli.Command) []string {
 	return x.StringSplits(cmd.StringSlice(FlagsTags), ",")
 }
+
+// GetFirstTags returns the first tag from the command flags.
+// Returns an error if no tags are provided.
 func GetFirstTags(cmd *cli.Command) (string, error) {
 	tags := GetTags(cmd)
 	if len(tags) <= 0 {
@@ -103,6 +132,8 @@ func GetFirstTags(cmd *cli.Command) (string, error) {
 	return tags[0], nil
 }
 
+// GetFiles returns a slice of file paths specified in the command flags.
+// Supports comma-separated input and file pattern matching.
 func GetFiles(cmd *cli.Command) []string {
 	return x.MatchedFiles(x.StringSplits(cmd.StringSlice(FlagsFiles), ","))
 }

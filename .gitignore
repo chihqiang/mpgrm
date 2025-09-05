@@ -33,4 +33,3 @@ go.work.sum
 /.env
 /mpgrm
 /*.sh
-/.mpgrm/

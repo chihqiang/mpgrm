@@ -113,6 +113,16 @@ mpgrm repo list --repo https://github.com/organization
 mpgrm repo list --repo https://github.com
 ```
 
+####  Clone Repositories
+
+~~~bash
+# List and clone all repositories of an organization
+mpgrm repo clone --repo https://github.com/<organization>
+
+# List and clone all repositories of a user
+mpgrm repo clone --repo https://github.com/<username>
+~~~
+
 #### Sync Repositories
 
 ```bash
@@ -122,6 +132,10 @@ mpgrm repo sync --repo https://github.com/organization --target-repo https://git
 # Sync all repositories of a user
 mpgrm repo sync --repo https://github.com --target-repo https://gitee.com
 ```
+
+
+
+
 
 ## 🤝 Contribution Guide
 

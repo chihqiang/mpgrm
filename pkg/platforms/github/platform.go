@@ -9,6 +9,7 @@ import (
 )
 
 const (
+	HOST        = "github.com"
 	EnvPrefix   = "GITHUB"
 	EnvUsername = EnvPrefix + credential.EnvUsernameSuffix
 	EnvToken    = EnvPrefix + credential.EnvTokenSuffix

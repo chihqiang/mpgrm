@@ -12,49 +12,62 @@ import (
 	"wangzhiqiang/mpgrm/pkg/x"
 )
 
+// DoubleRepo represents a repository sync context between a source and a target repository.
+// It contains context, CLI command, source and target platforms, credentials, and repository full names.
 type DoubleRepo struct {
-	ctx context.Context
-	cmd *cli.Command
+	ctx context.Context // Context for controlling cancellation and deadlines
+	cmd *cli.Command    // CLI command instance
 
-	platform         platforms.IPlatform
-	credential       *credential.Credential
-	fullName         string
-	targetPlatform   platforms.IPlatform
-	targetCredential *credential.Credential
-	targetFullName   string
+	platform   platforms.IPlatform    // Source repository platform interface (GitHub, Gitee, Gitea, etc.)
+	credential *credential.Credential // Source repository authentication credential
+	fullName   string                 // Full name of the source repository (owner/repo[/subdir])
+
+	targetPlatform   platforms.IPlatform    // Target repository platform interface
+	targetCredential *credential.Credential // Target repository authentication credential
+	targetFullName   string                 // Full name of the target repository (owner/repo[/subdir])
 }
 
+// NewDoubleRepo initializes a DoubleRepo instance with source and target repository information.
+// It sets up the context, CLI command, credentials, platform interfaces, and full repository names.
 func NewDoubleRepo(ctx context.Context, cmd *cli.Command) (*DoubleRepo, error) {
 	rt := &DoubleRepo{ctx: ctx, cmd: cmd}
+
+	// Get source repository URL and credential
 	repoURL, cred, err := flags2.GetFormCredential(cmd, true)
 	if err != nil {
 		return rt, err
 	}
 	rt.credential = cred
 
+	// Get source platform interface
 	platform, err := platforms.GetPlatform(repoURL, cred)
 	if err != nil {
 		return rt, err
 	}
 	rt.platform = platform
 
+	// Parse source repository full name
 	fullName, err := x.RepoURLParseFullName(repoURL)
 	if err != nil {
 		return rt, err
 	}
 	rt.fullName = fullName
 
+	// Get target repository URL and credential
 	targetRepoURL, targetCred, err := flags2.GetTargetCredential(cmd)
 	if err != nil {
 		return rt, err
 	}
 	rt.targetCredential = targetCred
+
+	// Parse target repository full name
 	targetFullName, err := x.RepoURLParseFullName(targetRepoURL)
 	if err != nil {
 		return rt, err
 	}
 	rt.targetFullName = targetFullName
 
+	// Get target platform interface
 	targetPlatform, err := platforms.GetPlatform(targetRepoURL, targetCred)
 	if err != nil {
 		return rt, err
@@ -63,6 +76,14 @@ func NewDoubleRepo(ctx context.Context, cmd *cli.Command) (*DoubleRepo, error) {
 
 	return rt, nil
 }
+
+// ReleaseSync synchronizes releases from the source repository to the target repository.
+// It can optionally filter by specific tags provided in the `tags` slice.
+// Parameters:
+//   - tags: a slice of tag names to be synchronized. If empty, all tags will be considered.
+//
+// Returns:
+//   - error: any error encountered during the synchronization process.
 func (t *DoubleRepo) ReleaseSync(tags []string) error {
 	if len(tags) == 0 {
 		return fmt.Errorf("no tags provided for release sync")

@@ -9,12 +9,7 @@ import (
 	"wangzhiqiang/mpgrm/flags"
 )
 
-// PushCommand 返回一个 CLI 命令，用于执行 Git 仓库迁移操作。
-// 它包括以下步骤：
-// 1. 根据提供的 form 仓库和目标仓库的凭据初始化 GitMigrate 实例。
-// 2. 生成本地 workspace 用于存放克隆的仓库。
-// 3. 克隆指定的分支和标签到本地 workspace。
-// 4. 将本地仓库推送到目标仓库。
+// PushCommand defines the CLI command to push repositories to the target.
 func PushCommand() *cli.Command {
 	return &cli.Command{
 		UseShortOptionHandling: true,
@@ -22,7 +17,7 @@ func PushCommand() *cli.Command {
 		Usage:                  "Stress-free push, releases on demand",
 		Flags:                  flags.FormTargetRepo(),
 		Action: func(ctx context.Context, cmd *cli.Command) error {
-			git, err := factory.NewGitCmd(ctx, cmd)
+			git, err := factory.NewCmdDoubleGit(ctx, cmd)
 			if err != nil {
 				log.Printf("Failed to create Git instance: %v", err)
 				return err

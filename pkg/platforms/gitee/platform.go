@@ -11,6 +11,7 @@ const (
 )
 
 const (
+	HOST        = "gitee.com"
 	EnvPrefix   = "GITEE"
 	EnvUsername = EnvPrefix + credential.EnvUsernameSuffix
 	EnvToken    = EnvPrefix + credential.EnvTokenSuffix

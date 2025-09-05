@@ -10,6 +10,7 @@ import (
 	"wangzhiqiang/mpgrm/flags"
 )
 
+// ReleasesCommand defines the CLI command to manage releases.
 func ReleasesCommand() *cli.Command {
 	return &cli.Command{
 		UseShortOptionHandling: true,

@@ -9,6 +9,7 @@ import (
 	"wangzhiqiang/mpgrm/flags"
 )
 
+// RepoCommand defines the CLI command for repository operations.
 func RepoCommand() *cli.Command {
 	return &cli.Command{
 		UseShortOptionHandling: true,
@@ -30,6 +31,23 @@ func RepoCommand() *cli.Command {
 						return err
 					}
 					log.Printf("Repository listing completed successfully in %s", time.Since(start))
+					return nil
+				},
+			},
+			{
+				Name:  "clone",
+				Usage: "Pull down the code and make it yours",
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					start := time.Now()
+					repo, err := factory.NewRepo(ctx, cmd)
+					if err != nil {
+						return err
+					}
+					if err := repo.CloneRepo(); err != nil {
+						return err
+					}
+					elapsed := time.Since(start)
+					log.Printf("clone completed successfully in %s", elapsed)
 					return nil
 				},
 			},

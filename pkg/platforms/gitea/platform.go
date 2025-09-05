@@ -7,6 +7,7 @@ import (
 )
 
 const (
+	HOST        = "gitea.com"
 	EnvPrefix   = "GITEA"
 	EnvUsername = EnvPrefix + credential.EnvUsernameSuffix
 	EnvToken    = EnvPrefix + credential.EnvTokenSuffix
