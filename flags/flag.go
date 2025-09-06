@@ -17,35 +17,61 @@ const (
 	FlagsFiles    = "files"
 )
 
-// FormTargetRelease combines all flags needed for release operations.
-func FormTargetRelease() []cli.Flag {
+func FormReleaseUploadFiles() []cli.Flag {
 	var flag []cli.Flag
-	flag = append(flag, FormTargetFlags()...) // source and target repo flags
-	flag = append(flag, BranchFlags()...)     // branch selection
-	flag = append(flag, TagsFlags()...)       // tag selection
-	flag = append(flag, FilesFlags()...)      // files selection
+	flag = append(flag, FormFlags()...)
+	flag = append(flag, TagsFlags()...)  // tag selection
+	flag = append(flag, FilesFlags()...) // files selection
+	return flag
+}
+func FormReleaseDownload() []cli.Flag {
+	var flag []cli.Flag
+	flag = append(flag, FormFlags()...)
+	flag = append(flag, TagsFlags()...) // tag selection
+	return flag
+}
+
+func FormTargetReleaseSync() []cli.Flag {
+	var flag []cli.Flag
+	flag = append(flag, FormFlags()...)
+	flag = append(flag, TargetFlags()...)
+	flag = append(flag, TagsFlags()...)
 	return flag
 }
 
 // FormTargetRepo combines flags needed for repository operations.
 func FormTargetRepo() []cli.Flag {
 	var flag []cli.Flag
-	flag = append(flag, FormTargetFlags()...) // source and target repo flags
-	flag = append(flag, BranchFlags()...)     // branch selection
-	flag = append(flag, TagsFlags()...)       // tag selection
+	flag = append(flag, FormFlags()...)
+	flag = append(flag, TargetFlags()...)
 	return flag
 }
 
-// FormTargetFlags returns source and target repository URL flags.
-func FormTargetFlags() []cli.Flag {
+func FormTargetRepoPush() []cli.Flag {
+	var flag []cli.Flag
+	flag = append(flag, FormFlags()...)
+	flag = append(flag, TargetFlags()...)
+	flag = append(flag, BranchFlags()...)
+	flag = append(flag, TagsFlags()...)
+	return flag
+}
+
+func TargetFlags() []cli.Flag {
 	return []cli.Flag{
 		&cli.StringFlag{
-			Name:  FlagsFormRepo,
-			Usage: "Source repository URL, the starting point of your magic",
+			Name:     FlagsTargetRepo,
+			Usage:    "Target repository URL, the final destination of your conquest",
+			Required: true,
 		},
+	}
+}
+
+func FormFlags() []cli.Flag {
+	return []cli.Flag{
 		&cli.StringFlag{
-			Name:  FlagsTargetRepo,
-			Usage: "Target repository URL, the final destination of your conquest",
+			Name:     FlagsFormRepo,
+			Usage:    "Source repository URL, the starting point of your magic",
+			Required: true,
 		},
 	}
 }

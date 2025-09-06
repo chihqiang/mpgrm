@@ -16,11 +16,11 @@ func ReleasesCommand() *cli.Command {
 		UseShortOptionHandling: true,
 		Name:                   "releases",
 		Usage:                  "Manage your releases with ease",
-		Flags:                  flags.FormTargetRelease(),
 		Commands: []*cli.Command{
 			{
 				Name:  "upload",
 				Usage: "Upload the chosen release version",
+				Flags: flags.FormReleaseUploadFiles(),
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					start := time.Now()
 					log.Println("Starting upload...")
@@ -47,6 +47,7 @@ func ReleasesCommand() *cli.Command {
 			{
 				Name:  "download",
 				Usage: "Download release attachments for specified tags",
+				Flags: flags.FormReleaseDownload(),
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					start := time.Now()
 					log.Println("Starting download...")
@@ -68,6 +69,7 @@ func ReleasesCommand() *cli.Command {
 			{
 				Name:  "create",
 				Usage: "Create releases for all tags in the repo",
+				Flags: flags.FormFlags(),
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					start := time.Now()
 					log.Println("Starting release creation...")
@@ -85,6 +87,7 @@ func ReleasesCommand() *cli.Command {
 			},
 			{
 				Name:  "sync",
+				Flags: flags.FormTargetReleaseSync(),
 				Usage: "Sync releases from source repo to target repo",
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					start := time.Now()

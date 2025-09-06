@@ -15,11 +15,11 @@ func RepoCommand() *cli.Command {
 		UseShortOptionHandling: true,
 		Name:                   "repo",
 		Usage:                  "Your all-in-one repository command center",
-		Flags:                  flags.FormTargetRepo(),
 		Commands: []*cli.Command{
 			{
 				Name:  "list",
 				Usage: "List all available repositories",
+				Flags: flags.FormFlags(),
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					start := time.Now()
 					repo, err := factory.NewRepo(ctx, cmd)
@@ -37,6 +37,7 @@ func RepoCommand() *cli.Command {
 			{
 				Name:  "clone",
 				Usage: "Pull down the code and make it yours",
+				Flags: flags.FormFlags(),
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					start := time.Now()
 					repo, err := factory.NewRepo(ctx, cmd)
@@ -54,6 +55,7 @@ func RepoCommand() *cli.Command {
 			{
 				Name:  "sync",
 				Usage: "Keep your org or personal repos marching in step",
+				Flags: flags.FormTargetRepo(),
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					start := time.Now()
 					repo, err := factory.NewRepo(ctx, cmd)

@@ -15,7 +15,7 @@ func PushCommand() *cli.Command {
 		UseShortOptionHandling: true,
 		Name:                   "push",
 		Usage:                  "Stress-free push, releases on demand",
-		Flags:                  flags.FormTargetRepo(),
+		Flags:                  flags.FormTargetRepoPush(),
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			git, err := factory.NewCmdDoubleGit(ctx, cmd)
 			if err != nil {
