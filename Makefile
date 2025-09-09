@@ -7,7 +7,7 @@ DOCKER_PLATFORMS := linux/amd64,linux/arm64
 build:
 
 	@echo "Building $(OUTPUT) with version $(VERSION) ..."
-	GO111MODULE=on CGO_ENABLED=0 go build -ldflags "-s -w -X main.VERSION=$(VERSION)" -o $(OUTPUT) $(MAIN)
+	GO111MODULE=on CGO_ENABLED=0 go build -ldflags "-s -w -X main.version=$(VERSION)" -o $(OUTPUT) $(MAIN)
 	@echo "Build complete: $(OUTPUT)"
 
 # make docker VERSION=v1.0.0
