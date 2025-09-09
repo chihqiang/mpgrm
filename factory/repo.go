@@ -22,7 +22,6 @@ type Repo struct {
 	repoURL    *url.URL               // URL of the repository / 仓库 URL
 	platform   platforms.IPlatform    // Platform interface for operations (GitHub, Gitee, Gitea, etc.)
 	credential *credential.Credential // Authentication credential for the repository
-	fullName   string                 // Full repository name in format "owner/repo[/subdir]"
 }
 
 // NewRepo creates a new Repo instance based on the CLI command flags and credentials.
@@ -45,12 +44,6 @@ func NewRepo(ctx context.Context, cmd *cli.Command) (*Repo, error) {
 		return rt, err
 	}
 	rt.platform = platform // Assign platform
-	// Parse the full name of the repository (format: owner/repo or owner/repo/subdir)
-	fullName, err := cred.GetFullName()
-	if err != nil {
-		return rt, err
-	}
-	rt.fullName = fullName // Assign full repository name
 	// Return the initialized Repo instance
 	return rt, nil
 }
@@ -139,21 +132,23 @@ func (r *Repo) RepoSync() error {
 			defer mu.Unlock()
 			start := time.Now()
 			cloneURL := repo.CloneURL
-			targetRepoURL := fmt.Sprintf("%s/%s.git", targetURL.String(), repo.Name)
-			logger.Info("Source URL: %s", cloneURL)
-			logger.Info("Target URL: %s", targetRepoURL)
-			r.credential.CloneURL = cloneURL
-			targetCredential.CloneURL = targetRepoURL
-			doubleCredentialGit, err := NewDoubleCredentialGit(r.cmd, r.credential, targetCredential)
-			if err != nil {
-				logger.Error("Failed to create Git instance for %s: %v", targetRepoURL, err)
+			if err := targetCredential.SetCloneByRepoName(repo.Name); err != nil {
+				logger.Error(err.Error())
 				return
 			}
-			logger.Info("Git instance created for %s", targetRepoURL)
+			logger.Info("Source URL: %s", cloneURL)
+			logger.Info("Target URL: %s", targetCredential.CloneURL)
+			r.credential.CloneURL = cloneURL
+			doubleCredentialGit, err := NewDoubleCredentialGit(r.cmd, r.credential, targetCredential)
+			if err != nil {
+				logger.Error("Failed to create Git instance for %s: %v", targetCredential.CloneURL, err)
+				return
+			}
+			logger.Info("Git instance created for %s", targetCredential.CloneURL)
 			targetFullName, _ := targetCredential.GetFullName()
 			detail, err := targetPlatform.GetRepoDetail(r.ctx, targetFullName)
 			if err != nil || detail.ID == 0 {
-				logger.Warning("Target repository %s does not exist or cannot be fetched, creating...", targetRepoURL)
+				logger.Warning("Target repository %s does not exist or cannot be fetched, creating...", targetCredential.CloneURL)
 				if createErr := targetPlatform.CreateRepo(r.ctx, &platforms.RepoInfo{
 					Name:        repo.Name,
 					IsPrivate:   repo.IsPrivate,
@@ -161,16 +156,16 @@ func (r *Repo) RepoSync() error {
 					Description: repo.Description,
 					Homepage:    repo.Homepage,
 				}); createErr != nil {
-					logger.Error(" tcreate target repository %s: %v", targetRepoURL, createErr)
+					logger.Error(" create target repository %s: %v", targetCredential.CloneURL, createErr)
 					return
 				}
 			}
-			logger.Info("Pushing repository: %s", targetRepoURL)
+			logger.Info("Pushing repository: %s", targetCredential.CloneURL)
 			if err := doubleCredentialGit.Push(); err != nil {
-				logger.Error("push %s: %v", targetRepoURL, err)
+				logger.Error("push %s: %v", targetCredential.CloneURL, err)
 				return
 			}
-			logger.Info("Repository %s synced successfully (took %s)", targetRepoURL, time.Since(start))
+			logger.Info("Repository %s synced successfully (took %s)", targetCredential.CloneURL, time.Since(start))
 		}(repo)
 	}
 	wg.Wait()
@@ -179,13 +174,17 @@ func (r *Repo) RepoSync() error {
 }
 
 func (r *Repo) CreateRelease() error {
-	tags, err := r.platform.ListTags(r.ctx, r.fullName)
+	fullName, err := r.credential.GetFullName()
+	if err != nil {
+		return err
+	}
+	tags, err := r.platform.ListTags(r.ctx, fullName)
 	if err != nil {
 		return fmt.Errorf("failed to list tags: %w", err)
 	}
 	for i, tag := range tags {
 		start := time.Now()
-		_, err := r.platform.CreateRelease(r.ctx, r.fullName, &platforms.ReleaseInfo{TagName: tag.TagName})
+		_, err := r.platform.CreateRelease(r.ctx, fullName, &platforms.ReleaseInfo{TagName: tag.TagName})
 		if err != nil {
 			logger.Warning("failed to create release for tag '%s': %v", tag.TagName, err)
 			continue
@@ -196,9 +195,12 @@ func (r *Repo) CreateRelease() error {
 }
 
 func (r *Repo) Upload(tag string, filenames []string) error {
+	fullName, err := r.credential.GetFullName()
+	if err != nil {
+		return err
+	}
 	logger.Info("Uploading files for tag '%s'...", tag)
-
-	info, err := r.platform.GetTagReleaseInfo(r.ctx, r.fullName, tag)
+	info, err := r.platform.GetTagReleaseInfo(r.ctx, fullName, tag)
 	if err != nil {
 		return fmt.Errorf("failed to get release info for tag '%s': %w", tag, err)
 	}
@@ -216,6 +218,10 @@ func (r *Repo) Upload(tag string, filenames []string) error {
 }
 
 func (r *Repo) Download(tags []string) error {
+	fullName, err := r.credential.GetFullName()
+	if err != nil {
+		return err
+	}
 	if len(tags) == 0 {
 		return fmt.Errorf("no tags provided for download")
 	}
@@ -228,7 +234,7 @@ func (r *Repo) Download(tags []string) error {
 		start := time.Now()
 		logger.Info("Processing tag '%s' (%d/%d)", tag, i+1, len(tags))
 
-		info, err := r.platform.GetTagReleaseInfo(r.ctx, r.fullName, tag)
+		info, err := r.platform.GetTagReleaseInfo(r.ctx, fullName, tag)
 		if err != nil {
 			logger.Warning("get release info for tag '%s': %v", tag, err)
 			continue

@@ -18,9 +18,7 @@ type Git struct {
 	branches, tags []string
 
 	credential       *credential.Credential
-	fullName         string
 	targetCredential *credential.Credential
-	targetFullName   string
 }
 
 // NewDoubleCredentialGit creates a new Git instance using provided source and target credentials.
@@ -35,21 +33,6 @@ func NewDoubleCredentialGit(cmd *cli.Command, credential *credential.Credential,
 		credential:       credential,              // Source repository credential
 		targetCredential: targetCredential,        // Target repository credential
 	}
-
-	// Parse full name of the source repository (format: owner/repo or owner/repo/subdir)
-	fullName, err := credential.GetFullName()
-	if err != nil {
-		return rt, err
-	}
-	rt.fullName = fullName
-
-	// Parse full name of the target repository
-	targetFullName, err := targetCredential.GetFullName()
-	if err != nil {
-		return rt, err
-	}
-	rt.targetFullName = targetFullName
-
 	// Return the initialized Git instance
 	return rt, nil
 }
@@ -62,13 +45,6 @@ func NewCredentialGit(cmd *cli.Command, credential *credential.Credential) (*Git
 		tags:       flags.GetTags(cmd),      // Tags to operate on
 		credential: credential,              // Source repository credential
 	}
-	// Parse full name of the source repository (format: owner/repo or owner/repo/subdir)
-	fullName, err := credential.GetFullName()
-	if err != nil {
-		return rt, err
-	}
-	rt.fullName = fullName
-	// Return the initialized Git instance
 	return rt, nil
 }
 
@@ -82,31 +58,15 @@ func NewCmdDoubleGit(ctx context.Context, cmd *cli.Command) (*Git, error) {
 		branches:  flags.GetBranches(cmd),  // Branches to operate on
 		tags:      flags.GetTags(cmd),      // Tags to operate on
 	}
-
 	// Get source repository URL and credentials from CLI flags
 	_, cred, _ := flags.GetFormCredential(cmd, false)
 	rt.credential = cred // Assign source repository credential
-	// Parse the full name of the source repository (format: owner/repo or owner/repo/subdir)
-	fullName, err := cred.GetFullName()
-	if err != nil {
-		return rt, err
-	}
-	rt.fullName = fullName // Assign parsed full name
-
 	// Get target repository URL and credentials from CLI flags
 	_, targetCred, err := flags.GetTargetCredential(cmd)
 	if err != nil {
 		return rt, err
 	}
 	rt.targetCredential = targetCred // Assign target repository credential
-
-	// Parse the full name of the target repository (format: owner/repo or owner/repo/subdir)
-	targetFullName, err := targetCred.GetFullName()
-	if err != nil {
-		return rt, err
-	}
-	rt.targetFullName = targetFullName // Assign parsed target repository full name
-
 	// Return the initialized Git instance
 	return rt, nil
 }
