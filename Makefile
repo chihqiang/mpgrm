@@ -14,7 +14,7 @@ build:
 docker:
 
 	@echo "Building Docker image $(IMAGE_NAME):latest and $(VERSION) for platforms $(DOCKER_PLATFORMS)"
-	docker buildx build --platform $(DOCKER_PLATFORMS) -t $(IMAGE_NAME):latest --push .
+	docker buildx build --platform $(DOCKER_PLATFORMS) -t $(IMAGE_NAME):latest --build-arg VERSION=$(VERSION) --push .
 
 check:
 

@@ -111,13 +111,16 @@ func NewCmdDoubleGit(ctx context.Context, cmd *cli.Command) (*Git, error) {
 	return rt, nil
 }
 
+func (g *Git) getPath() (string, error) {
+	return g.credential.GetCategoryNamWorkspace(credential.WorkspaceCategoryGit, g.workspace)
+}
+
 func (g *Git) Clone() error {
 	start := time.Now()
-
 	migrate := gitx.NewGitMigrate()
 	migrate.WithForm(g.credential)
 	// 获取 workspace
-	workspace, err := g.credential.GetCategoryNamWorkspace(credential.WorkspaceCategoryGit, g.workspace)
+	workspace, err := g.getPath()
 	if err != nil {
 		return err
 	}
@@ -133,19 +136,15 @@ func (g *Git) Clone() error {
 }
 
 func (g *Git) Push() error {
-	log.Printf("Starting git migration from %s to %s", g.fullName, g.targetFullName)
-
+	log.Printf("Starting git sync from %s to %s", g.credential.CloneURL, g.targetCredential.CloneURL)
 	start := time.Now()
 	migrate := gitx.NewGitMigrateDouble(g.credential, g.targetCredential)
-
 	// 获取 workspace
-	workspace, err := g.credential.GetCategoryNamWorkspace(credential.WorkspaceCategoryGit, g.workspace)
+	workspace, err := g.getPath()
 	if err != nil {
 		log.Printf("Failed to get workspace: %v", err)
 		return err
 	}
-	log.Printf("Using workspace: %s", workspace)
-
 	// 获取分支和标签
 	branches := g.branches
 	tags := g.tags

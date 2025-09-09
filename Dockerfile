@@ -1,8 +1,9 @@
 FROM golang:1.23-alpine AS builder
 RUN apk add --no-cache make git gcc musl-dev
+ARG VERSION=main
 WORKDIR /app
 COPY . .
-RUN make build
+RUN make build VERSION=${VERSION}
 
 FROM debian:bookworm-slim
 RUN apt-get update && apt-get install -y git git-lfs git-svn subversion curl wget jq \

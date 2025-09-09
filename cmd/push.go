@@ -22,19 +22,14 @@ func PushCommand() *cli.Command {
 				log.Printf("Failed to create Git instance: %v", err)
 				return err
 			}
-			log.Println("Git instance created successfully")
-
 			log.Println("Starting push operation...")
 			start := time.Now()
-
 			if err := git.Push(); err != nil {
 				log.Printf("Git push failed: %v", err)
 				return err
 			}
-
 			elapsed := time.Since(start)
 			log.Printf("Git push completed successfully, elapsed time: %s", elapsed)
-
 			return nil
 		},
 	}

@@ -7,25 +7,59 @@ import (
 )
 
 // RepoParseFullName extracts the repository owner and repository name from FullName.
-// FullName format is usually "owner/repo", but may contain multiple path segments.
 // Rules:
-// - owner: the first segment
-// - repo: the remaining segments joined by "/"
+// - repo: the last segment, must not be empty
+// - owner: all preceding segments joined by "/"
+// - Trailing "/" is invalid
+// - If FullName is invalid (empty, only one segment, last segment empty, or ends with "/"), return an error
 // Examples:
 //
-//	"openai/chatgpt"            -> owner="openai", repo="chatgpt"
-//	"google/cloud/storage"      -> owner="google", repo="cloud/storage"
-//	"microsoft/azure/devops"    -> owner="microsoft", repo="azure/devops"
+//	"openai/chatgpt"        -> owner="openai", repo="chatgpt"
+//	"google/cloud/storage"  -> owner="google/cloud", repo="storage"
+//
+// Invalid cases:
+//
+//	"owner/repo/" -> error
+//	"/repo"       -> error
+//	"owner/"      -> error
+//	"invalidformat" -> error
+//	""            -> error
 func RepoParseFullName(fullName string) (owner string, repo string, err error) {
 	if fullName == "" {
 		return "", "", fmt.Errorf("FullName is empty")
 	}
-	fullNameParts := strings.Split(fullName, "/")
-	if len(fullNameParts) < 2 {
+
+	// Trailing slash is invalid
+	if strings.HasSuffix(fullName, "/") {
+		return "", "", fmt.Errorf("invalid FullName, trailing slash not allowed: %s", fullName)
+	}
+
+	// Trim leading slashes
+	fullName = strings.TrimLeft(fullName, "/")
+
+	// Split path by "/"
+	parts := strings.Split(fullName, "/")
+
+	// Must have at least 2 segments
+	if len(parts) < 2 {
 		return "", "", fmt.Errorf("invalid FullName format: %s", fullName)
 	}
-	owner = fullNameParts[0]
-	repo = strings.Join(fullNameParts[1:], "/") // join remaining parts as repo
+
+	// Last segment is repo
+	repo = parts[len(parts)-1]
+	if repo == "" {
+		return "", "", fmt.Errorf("invalid FullName, repository name is empty: %s", fullName)
+	}
+
+	// Remove .git suffix if present
+	repo = strings.TrimSuffix(repo, ".git")
+
+	// Owner is all preceding segments joined by "/"
+	owner = strings.Join(parts[:len(parts)-1], "/")
+	if owner == "" {
+		return "", "", fmt.Errorf("invalid FullName, owner is empty: %s", fullName)
+	}
+
 	return owner, repo, nil
 }
 
@@ -53,23 +87,40 @@ func RepoURLParseOrgName(repoURL *url.URL) (string, error) {
 	return RepoFullNameOrgName(repoURL.Path), nil
 }
 
-func RepoFullNameOrgName(path string) string {
-	// 去掉开头和结尾的 /
-	path = strings.Trim(path, "/")
-	if path == "" {
+// RepoFullNameOrgName returns the organization path from a repository path by removing the repository name.
+// Examples:
+// 1. "/org/repo.git"       -> "org"           (.git suffix, remove last segment)
+// 2. "/org/org1/repo.git"  -> "org/org1"      (.git suffix, remove last segment)
+// 3. "/org/org1/repo"      -> "org/org1"      (no trailing /, remove last segment)
+// 4. "/org/org1/repo/"     -> "org/org1/repo" (trailing /, keep last segment)
+// 5. "/org"                -> ""              (single segment, return empty)
+// 6. "/"                   -> ""              (empty path)
+// 7. ""                    -> ""              (empty string)
+func RepoFullNameOrgName(p string) string {
+	if p == "" {
 		return ""
 	}
-	parts := strings.Split(path, "/")
-	if len(parts) == 1 {
-		// 只有一段，直接返回
-		return parts[0]
+	// 拆分路径并去掉空片段（前导 / 会产生空字符串）
+	parts := strings.Split(p, "/")
+	cleanParts := []string{}
+	for _, part := range parts {
+		if part != "" {
+			cleanParts = append(cleanParts, part)
+		}
 	}
-	// 判断最后一段是否是仓库名（通常带 .git 或者当作 repo）
-	last := parts[len(parts)-1]
-	if strings.HasSuffix(last, ".git") || len(parts) > 1 {
-		// 去掉最后一段
-		return strings.Join(parts[:len(parts)-1], "/")
+
+	if len(cleanParts) <= 1 {
+		// 只有一段或空，返回空字符串
+		return ""
 	}
-	// 否则返回完整路径
-	return path
+
+	last := cleanParts[len(cleanParts)-1]
+	if strings.HasSuffix(last, ".git") {
+		// 以 .git 结尾，去掉最后一段
+		cleanParts = cleanParts[:len(cleanParts)-1]
+	} else if !strings.HasSuffix(p, "/") {
+		// 不以 / 结尾，去掉最后一段
+		cleanParts = cleanParts[:len(cleanParts)-1]
+	}
+	return strings.Join(cleanParts, "/")
 }

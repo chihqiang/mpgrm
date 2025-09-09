@@ -27,7 +27,7 @@ func RepoCommand() *cli.Command {
 						return err
 					}
 					log.Println("Repo initialized successfully")
-					if err := repo.ListRepo(); err != nil {
+					if _, err := repo.ListRepo(); err != nil {
 						return err
 					}
 					log.Printf("Repository listing completed successfully in %s", time.Since(start))

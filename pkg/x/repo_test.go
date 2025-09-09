@@ -15,14 +15,14 @@ func TestRepoParseFullName(t *testing.T) {
 		// 普通 owner/repo
 		{"openai/chatgpt", "openai", "chatgpt", false},
 		// 多层 repo
-		{"google/cloud/storage", "google", "cloud/storage", false},
-		{"microsoft/azure/devops", "microsoft", "azure/devops", false},
+		{"google/cloud/storage", "google/cloud", "storage", false},
+		{"microsoft/azure/devops", "microsoft/azure", "devops", false},
 		// 带尾部斜杠（不推荐，但测试兼容性）
-		{"owner/repo/", "owner", "repo/", false},
+		{"owner/repo/", "", "", true},
 		// owner 为空
-		{"/repo", "", "repo", false}, // 可以根据实际需求决定是否报错
+		{"/repo", "", "", true}, // 可以根据实际需求决定是否报错
 		// repo 为空
-		{"owner/", "owner", "", false}, // 可以根据实际需求决定是否报错
+		{"owner/", "", "", true}, // 可以根据实际需求决定是否报错
 		// 格式错误
 		{"invalidformat", "", "", true},
 		// 空字符串
@@ -105,7 +105,7 @@ func TestRepoURLParseOrgName(t *testing.T) {
 		{"https://github.com/org/repo.git", "org", false},
 		{"https://github.com/org/org1/repo.git", "org/org1", false},
 		{"https://github.com/org/org1/org2/repo.git", "org/org1/org2", false},
-		{"https://github.com/org", "org", false},
+		{"https://github.com/org", "", false},
 		{"https://github.com/org/ee", "org", false},
 		{"https://github.com", "", false},
 		{"https://github.com/", "", false},
@@ -123,5 +123,31 @@ func TestRepoURLParseOrgName(t *testing.T) {
 				t.Errorf("RepoURLParseOrgName() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestRepoFullNameOrgName(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"/org/repo.git", "org"},
+		{"/org/org1/repo.git", "org/org1"},
+		{"/org/org1/repo", "org/org1"},
+		{"/org/org1/repo/", "org/org1/repo"},
+		{"/org", ""},
+		{"/", ""},
+		{"", ""},
+		{"org/repo.git", "org"},
+		{"org/org1/repo", "org/org1"},
+		{"org/org1/repo/", "org/org1/repo"},
+		{"single", ""},
+	}
+
+	for _, tt := range tests {
+		got := RepoFullNameOrgName(tt.input)
+		if got != tt.expected {
+			t.Errorf("RepoFullNameOrgName(%q) = %q; want %q", tt.input, got, tt.expected)
+		}
 	}
 }

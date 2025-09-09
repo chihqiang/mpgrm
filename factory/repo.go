@@ -45,27 +45,23 @@ func NewRepo(ctx context.Context, cmd *cli.Command) (*Repo, error) {
 		return rt, err
 	}
 	rt.platform = platform // Assign platform
-
 	// Parse the full name of the repository (format: owner/repo or owner/repo/subdir)
 	fullName, err := cred.GetFullName()
 	if err != nil {
 		return rt, err
 	}
 	rt.fullName = fullName // Assign full repository name
-
 	// Return the initialized Repo instance
 	return rt, nil
 }
-func (r *Repo) ListRepo() error {
+
+func (r *Repo) ListRepo() (repo []*platforms.RepoInfo, err error) {
 	log.Println("Starting to list repositories...")
 	orgName, err := x.RepoURLParseOrgName(r.repoURL)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	log.Printf("Parsed organization/subpath: %s", orgName)
-
-	var repo []*platforms.RepoInfo
-
 	log.Println("Fetching repositories from platform...")
 	if orgName != "" {
 		log.Printf("Organization/subpath detected: %s, fetching org repositories...", orgName)
@@ -75,37 +71,21 @@ func (r *Repo) ListRepo() error {
 		repo, err = r.platform.ListUserRepo(r.ctx)
 	}
 	if err != nil {
-		return err
+		return nil, err
 	}
 	log.Printf("Successfully fetched %d repositories", len(repo))
 	// 遍历仓库并打印名称
 	for _, rInfo := range repo {
 		log.Printf("  - %s", rInfo.CloneURL)
 	}
-	return nil
+	return repo, nil
 }
+
 func (r *Repo) CloneRepo() error {
-	log.Println("Starting to clone repositories...")
-	orgName, err := x.RepoURLParseOrgName(r.repoURL)
+	repo, err := r.ListRepo()
 	if err != nil {
 		return err
 	}
-	log.Printf("Parsed organization/subpath: %s", orgName)
-
-	var repo []*platforms.RepoInfo
-
-	log.Println("Fetching repositories from platform...")
-	if orgName != "" {
-		log.Printf("Organization/subpath detected: %s, fetching org repositories...", orgName)
-		repo, err = r.platform.ListOrgRepo(r.ctx, orgName)
-	} else {
-		log.Println("No organization/subpath detected, fetching user repositories...")
-		repo, err = r.platform.ListUserRepo(r.ctx)
-	}
-	if err != nil {
-		return err
-	}
-	log.Printf("Successfully fetched %d repositories", len(repo))
 	var wg sync.WaitGroup
 	var mu sync.Mutex
 	for _, repo := range repo {
@@ -134,7 +114,6 @@ func (r *Repo) CloneRepo() error {
 	return nil
 }
 func (r *Repo) RepoSync() error {
-	log.Println("Starting repository sync...")
 	targetURL, targetCredential, err := flags.GetTargetCredential(r.cmd)
 	if err != nil {
 		return err
@@ -144,23 +123,11 @@ func (r *Repo) RepoSync() error {
 	if err != nil {
 		return err
 	}
-	log.Println("Target platform initialized successfully")
-
-	orgName, err := x.RepoURLParseOrgName(r.repoURL)
+	repos, err := r.ListRepo()
 	if err != nil {
 		return err
 	}
-	var repos []*platforms.RepoInfo
-	if orgName != "" {
-		repos, err = r.platform.ListOrgRepo(r.ctx, orgName)
-		log.Printf("Fetched %d repositories from org: %s", len(repos), orgName)
-	} else {
-		repos, err = r.platform.ListUserRepo(r.ctx)
-		log.Printf("Fetched %d user repositories", len(repos))
-	}
-	if err != nil {
-		return err
-	}
+	log.Println("Starting repository sync...")
 	var wg sync.WaitGroup
 	var mu sync.Mutex
 	for _, repo := range repos {
@@ -173,20 +140,20 @@ func (r *Repo) RepoSync() error {
 			start := time.Now()
 			cloneURL := repo.CloneURL
 			targetRepoURL := fmt.Sprintf("%s/%s.git", targetURL.String(), repo.Name)
-			log.Printf("Source clone URL: %s", cloneURL)
-			log.Printf("Target repo URL: %s", targetRepoURL)
+			log.Printf("Source URL: %s", cloneURL)
+			log.Printf("Target URL: %s", targetRepoURL)
 			r.credential.CloneURL = cloneURL
 			targetCredential.CloneURL = targetRepoURL
 			doubleCredentialGit, err := NewDoubleCredentialGit(r.cmd, r.credential, targetCredential)
 			if err != nil {
-				log.Printf("Failed to create Git instance for %s: %v", repo.Name, err)
+				log.Printf("Failed to create Git instance for %s: %v", targetRepoURL, err)
 				return
 			}
-			log.Printf("Git instance created for %s", repo.Name)
+			log.Printf("Git instance created for %s", targetRepoURL)
 			targetFullName, _ := targetCredential.GetFullName()
 			detail, err := targetPlatform.GetRepoDetail(r.ctx, targetFullName)
 			if err != nil || detail.ID == 0 {
-				log.Printf("Target repository %s does not exist or cannot be fetched, creating...", repo.Name)
+				log.Printf("Target repository %s does not exist or cannot be fetched, creating...", targetRepoURL)
 				if createErr := targetPlatform.CreateRepo(r.ctx, &platforms.RepoInfo{
 					Name:        repo.Name,
 					IsPrivate:   repo.IsPrivate,
@@ -194,16 +161,16 @@ func (r *Repo) RepoSync() error {
 					Description: repo.Description,
 					Homepage:    repo.Homepage,
 				}); createErr != nil {
-					log.Printf("Failed to create target repository %s: %v", repo.Name, createErr)
+					log.Printf("Failed to create target repository %s: %v", targetRepoURL, createErr)
 					return
 				}
 			}
-			log.Printf("Pushing repository: %s", repo.Name)
+			log.Printf("Pushing repository: %s", targetRepoURL)
 			if err := doubleCredentialGit.Push(); err != nil {
-				log.Printf("Failed to push %s: %v", repo.Name, err)
+				log.Printf("Failed to push %s: %v", targetRepoURL, err)
 				return
 			}
-			log.Printf("Repository %s synced successfully (took %s)", repo.Name, time.Since(start))
+			log.Printf("Repository %s synced successfully (took %s)", targetRepoURL, time.Since(start))
 		}(repo)
 	}
 	wg.Wait()

@@ -107,7 +107,7 @@ mpgrm releases sync --repo https://github.com/username/source-repo.git --target-
 
 ```bash
 # List all repositories of an organization
-mpgrm repo list --repo https://github.com/organization
+mpgrm repo list --repo https://github.com/organization/
 
 # List all repositories of a user
 mpgrm repo list --repo https://github.com
@@ -117,7 +117,7 @@ mpgrm repo list --repo https://github.com
 
 ~~~bash
 # List and clone all repositories of an organization
-mpgrm repo clone --repo https://github.com/<organization>
+mpgrm repo clone --repo https://github.com/<organization>/
 
 # List and clone all repositories of a user
 mpgrm repo clone --repo https://github.com/<username>
@@ -127,15 +127,11 @@ mpgrm repo clone --repo https://github.com/<username>
 
 ```bash
 # Sync all repositories of an organization
-mpgrm repo sync --repo https://github.com/organization --target-repo https://gitee.com/organization
+mpgrm repo sync --repo https://github.com/organization/ --target-repo https://gitee.com/organization/
 
 # Sync all repositories of a user
 mpgrm repo sync --repo https://github.com --target-repo https://gitee.com
 ```
-
-
-
-
 
 ## 🤝 Contribution Guide
 
@@ -152,5 +148,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📧 Contact
 
 If you have any questions or suggestions, please feel free to submit issues or contact the project maintainers.
-
----
