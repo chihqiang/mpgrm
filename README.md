@@ -133,15 +133,15 @@ mpgrm repo sync --repo https://github.com/organization/ --target-repo https://gi
 mpgrm repo sync --repo https://github.com --target-repo https://gitee.com
 ```
 
-### CloneURL Usage Guide
+### repo & target-repo Usage Guide
 
 CloneURL determines whether it points to an **organization** or a **repository** based on the trailing character.
 
-#### Organization URL (ends with `/`)
+#### 1. Organization URL (ends with `/`)
 
-- Indicates a **user or organization path**.
+- Indicates a organization path.
 - The repository name should be appended to generate a full repository URL.
-- **Currently, URLs without a trailing `/` (e.g., `https://github.com/org`) are NOT supported.**
+- Currently, URLs without a trailing `/` (e.g., `https://github.com/org`) are NOT supported.
 - Examples:
 
 ```yaml
@@ -151,7 +151,21 @@ https://cnb.cool/org1/child1/ -> org1/child1
 https://cnb.cool/org1/child1/child2/ -> org1/child1/child2
 ```
 
-#### 2. Repository URL (does not end with `/` or ends with `.git`)
+## 2. Personal Homepage or Root URL
+
+- URLs that point to the root of a domain or user homepage.
+- Usually just for reference; no repository is implied.
+
+- Examples:
+
+```yml
+https://github.com/
+https://github.com
+https://cnb.cool
+https://cnb.cool/
+```
+
+#### 3. Repository URL (does not end with `/` or ends with `.git`)
 
 ```yml
 https://github.com/org/repo.git
