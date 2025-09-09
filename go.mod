@@ -5,6 +5,7 @@ go 1.23.12
 require (
 	cnb.cool/cnb/sdk/go-cnb v1.0.8
 	code.gitea.io/sdk/gitea v0.22.0
+	github.com/fatih/color v1.18.0
 	github.com/go-git/go-git/v5 v5.16.2
 	github.com/google/go-github/v73 v73.0.0
 	github.com/joho/godotenv v1.5.1
@@ -31,6 +32,8 @@ require (
 	github.com/hashicorp/go-version v1.7.0 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
+	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/pjbgf/sha1cd v0.3.2 // indirect
 	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
 	github.com/skeema/knownhosts v1.3.1 // indirect

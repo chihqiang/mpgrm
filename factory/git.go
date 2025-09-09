@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 	"github.com/urfave/cli/v3"
-	"log"
 	"time"
 	"wangzhiqiang/mpgrm/flags"
 	"wangzhiqiang/mpgrm/pkg/credential"
 	"wangzhiqiang/mpgrm/pkg/gitx"
+	"wangzhiqiang/mpgrm/pkg/logger"
 )
 
 type Git struct {
@@ -124,47 +124,43 @@ func (g *Git) Clone() error {
 	if err != nil {
 		return err
 	}
-	log.Printf("Start cloning repository: %s to local %s", g.credential.CloneURL, workspace)
+	logger.Info("Start cloning repository: %s to local %s", g.credential.CloneURL, workspace)
 	// Clone 仓库并获取实际分支和标签
 	_, _, err = migrate.Clone(workspace, []string{}, []string{})
 	if err != nil {
 		return fmt.Errorf("failed to clone repository: %w", err)
 	}
 	elapsed := time.Since(start)
-	log.Printf("Clone %s completed in %s", g.credential.CloneURL, elapsed)
+	logger.Info("Clone %s completed in %s", g.credential.CloneURL, elapsed)
 	return nil
 }
 
 func (g *Git) Push() error {
-	log.Printf("Starting git sync from %s to %s", g.credential.CloneURL, g.targetCredential.CloneURL)
+	logger.Info("Starting git sync from %s to %s", g.credential.CloneURL, g.targetCredential.CloneURL)
 	start := time.Now()
 	migrate := gitx.NewGitMigrateDouble(g.credential, g.targetCredential)
 	// 获取 workspace
 	workspace, err := g.getPath()
 	if err != nil {
-		log.Printf("Failed to get workspace: %v", err)
 		return err
 	}
 	// 获取分支和标签
 	branches := g.branches
 	tags := g.tags
-	log.Printf("Preparing to clone branches: %v, tags: %v", branches, tags)
+	logger.Info("Preparing to clone branches: %v, tags: %v", branches, tags)
 
 	// Clone 仓库并获取实际分支和标签
 	actualBranches, actualTags, err := migrate.Clone(workspace, branches, tags)
 	if err != nil {
-		log.Printf("Failed to clone repository: %v", err)
 		return fmt.Errorf("failed to clone repository: %w", err)
 	}
-	log.Printf("Repository cloned successfully. Cloned branches: %v, tags: %v", actualBranches, actualTags)
+	logger.Info("Repository cloned successfully. Cloned branches: %v, tags: %v", actualBranches, actualTags)
 
 	// Push 到目标仓库
 	if err := migrate.Push(workspace); err != nil {
-		log.Printf("Failed to push repository: %v", err)
 		return err
 	}
-
 	elapsed := time.Since(start)
-	log.Printf("Push to target repository completed successfully, total elapsed time: %s", elapsed)
+	logger.Info("Push to target repository completed successfully, total elapsed time: %s", elapsed)
 	return nil
 }

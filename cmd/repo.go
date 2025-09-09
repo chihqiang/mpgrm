@@ -3,10 +3,10 @@ package cmd
 import (
 	"context"
 	"github.com/urfave/cli/v3"
-	"log"
 	"time"
 	"wangzhiqiang/mpgrm/factory"
 	"wangzhiqiang/mpgrm/flags"
+	"wangzhiqiang/mpgrm/pkg/logger"
 )
 
 // RepoCommand defines the CLI command for repository operations.
@@ -26,11 +26,11 @@ func RepoCommand() *cli.Command {
 					if err != nil {
 						return err
 					}
-					log.Println("Repo initialized successfully")
+					logger.Info("Repo initialized successfully")
 					if _, err := repo.ListRepo(); err != nil {
 						return err
 					}
-					log.Printf("Repository listing completed successfully in %s", time.Since(start))
+					logger.Info("Repository listing completed successfully in %s", time.Since(start))
 					return nil
 				},
 			},
@@ -48,7 +48,7 @@ func RepoCommand() *cli.Command {
 						return err
 					}
 					elapsed := time.Since(start)
-					log.Printf("clone completed successfully in %s", elapsed)
+					logger.Info("clone completed successfully in %s", elapsed)
 					return nil
 				},
 			},
@@ -62,11 +62,11 @@ func RepoCommand() *cli.Command {
 					if err != nil {
 						return err
 					}
-					log.Println("Repo initialized successfully")
+					logger.Info("Repo initialized successfully")
 					if err := repo.RepoSync(); err != nil {
 						return err
 					}
-					log.Printf("RepoSync completed successfully (elapsed: %s)", time.Since(start))
+					logger.Info("RepoSync completed successfully (elapsed: %s)", time.Since(start))
 					return nil
 				},
 			},

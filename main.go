@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/urfave/cli/v3"
-	"log"
 	"os"
 	"runtime"
 	"wangzhiqiang/mpgrm/cmd"
 	"wangzhiqiang/mpgrm/flags"
+	"wangzhiqiang/mpgrm/pkg/logger"
 	"wangzhiqiang/mpgrm/register"
 )
 
@@ -40,6 +40,7 @@ func main() {
 	}
 	app.Commands = commands
 	if err := app.Run(context.Background(), os.Args); err != nil {
-		log.Fatal(err)
+		logger.Error(err.Error())
+		os.Exit(1)
 	}
 }

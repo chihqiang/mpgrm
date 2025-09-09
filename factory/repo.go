@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 	"github.com/urfave/cli/v3"
-	"log"
 	"net/url"
 	"sync"
 	"time"
 	"wangzhiqiang/mpgrm/flags"
 	"wangzhiqiang/mpgrm/pkg/credential"
+	"wangzhiqiang/mpgrm/pkg/logger"
 	"wangzhiqiang/mpgrm/pkg/platforms"
 	"wangzhiqiang/mpgrm/pkg/x"
 )
@@ -56,27 +56,27 @@ func NewRepo(ctx context.Context, cmd *cli.Command) (*Repo, error) {
 }
 
 func (r *Repo) ListRepo() (repo []*platforms.RepoInfo, err error) {
-	log.Println("Starting to list repositories...")
+	logger.Info("Starting to list repositories...")
 	orgName, err := x.RepoURLParseOrgName(r.repoURL)
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("Parsed organization/subpath: %s", orgName)
-	log.Println("Fetching repositories from platform...")
+	logger.Info("Parsed organization/subpath: %s", orgName)
+	logger.Info("Fetching repositories from platform...")
 	if orgName != "" {
-		log.Printf("Organization/subpath detected: %s, fetching org repositories...", orgName)
+		logger.Info("Organization/subpath detected: %s, fetching org repositories...", orgName)
 		repo, err = r.platform.ListOrgRepo(r.ctx, orgName)
 	} else {
-		log.Println("No organization/subpath detected, fetching user repositories...")
+		logger.Info("No organization/subpath detected, fetching user repositories...")
 		repo, err = r.platform.ListUserRepo(r.ctx)
 	}
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("Successfully fetched %d repositories", len(repo))
+	logger.Info("Successfully fetched %d repositories", len(repo))
 	// 遍历仓库并打印名称
 	for _, rInfo := range repo {
-		log.Printf("  - %s", rInfo.CloneURL)
+		logger.Info("  - %s", rInfo.CloneURL)
 	}
 	return repo, nil
 }
@@ -100,14 +100,14 @@ func (r *Repo) CloneRepo() error {
 			r.credential.CloneURL = cloneURL
 			git, err := NewCredentialGit(r.cmd, r.credential)
 			if err != nil {
-				log.Printf("Failed to create Git instance for %s: %v", repo.CloneURL, err)
+				logger.Error(" create Git instance for %s: %v", repo.CloneURL, err)
 				return
 			}
 			if err := git.Clone(); err != nil {
-				log.Printf("Failed to clone %s: %v", repo.CloneURL, err)
+				logger.Error("clone %s: %v", repo.CloneURL, err)
 				return
 			}
-			log.Printf("Repository %s cloned successfully (took %s)", repo.CloneURL, time.Since(start))
+			logger.Info("Repository %s cloned successfully (took %s)", repo.CloneURL, time.Since(start))
 		}(repo)
 	}
 	wg.Wait()
@@ -118,7 +118,7 @@ func (r *Repo) RepoSync() error {
 	if err != nil {
 		return err
 	}
-	log.Printf("Target URL parsed: %s", targetURL.String())
+	logger.Info("Target URL parsed: %s", targetURL.String())
 	targetPlatform, err := platforms.GetPlatform(targetURL, targetCredential)
 	if err != nil {
 		return err
@@ -127,7 +127,7 @@ func (r *Repo) RepoSync() error {
 	if err != nil {
 		return err
 	}
-	log.Println("Starting repository sync...")
+	logger.Info("Starting repository sync...")
 	var wg sync.WaitGroup
 	var mu sync.Mutex
 	for _, repo := range repos {
@@ -140,20 +140,20 @@ func (r *Repo) RepoSync() error {
 			start := time.Now()
 			cloneURL := repo.CloneURL
 			targetRepoURL := fmt.Sprintf("%s/%s.git", targetURL.String(), repo.Name)
-			log.Printf("Source URL: %s", cloneURL)
-			log.Printf("Target URL: %s", targetRepoURL)
+			logger.Info("Source URL: %s", cloneURL)
+			logger.Info("Target URL: %s", targetRepoURL)
 			r.credential.CloneURL = cloneURL
 			targetCredential.CloneURL = targetRepoURL
 			doubleCredentialGit, err := NewDoubleCredentialGit(r.cmd, r.credential, targetCredential)
 			if err != nil {
-				log.Printf("Failed to create Git instance for %s: %v", targetRepoURL, err)
+				logger.Error("Failed to create Git instance for %s: %v", targetRepoURL, err)
 				return
 			}
-			log.Printf("Git instance created for %s", targetRepoURL)
+			logger.Info("Git instance created for %s", targetRepoURL)
 			targetFullName, _ := targetCredential.GetFullName()
 			detail, err := targetPlatform.GetRepoDetail(r.ctx, targetFullName)
 			if err != nil || detail.ID == 0 {
-				log.Printf("Target repository %s does not exist or cannot be fetched, creating...", targetRepoURL)
+				logger.Warning("Target repository %s does not exist or cannot be fetched, creating...", targetRepoURL)
 				if createErr := targetPlatform.CreateRepo(r.ctx, &platforms.RepoInfo{
 					Name:        repo.Name,
 					IsPrivate:   repo.IsPrivate,
@@ -161,20 +161,20 @@ func (r *Repo) RepoSync() error {
 					Description: repo.Description,
 					Homepage:    repo.Homepage,
 				}); createErr != nil {
-					log.Printf("Failed to create target repository %s: %v", targetRepoURL, createErr)
+					logger.Error(" tcreate target repository %s: %v", targetRepoURL, createErr)
 					return
 				}
 			}
-			log.Printf("Pushing repository: %s", targetRepoURL)
+			logger.Info("Pushing repository: %s", targetRepoURL)
 			if err := doubleCredentialGit.Push(); err != nil {
-				log.Printf("Failed to push %s: %v", targetRepoURL, err)
+				logger.Error("push %s: %v", targetRepoURL, err)
 				return
 			}
-			log.Printf("Repository %s synced successfully (took %s)", targetRepoURL, time.Since(start))
+			logger.Info("Repository %s synced successfully (took %s)", targetRepoURL, time.Since(start))
 		}(repo)
 	}
 	wg.Wait()
-	log.Println("All repositories sync completed")
+	logger.Info("All repositories sync completed")
 	return nil
 }
 
@@ -187,16 +187,16 @@ func (r *Repo) CreateRelease() error {
 		start := time.Now()
 		_, err := r.platform.CreateRelease(r.ctx, r.fullName, &platforms.ReleaseInfo{TagName: tag.TagName})
 		if err != nil {
-			log.Printf("Warning: failed to create release for tag '%s': %v", tag.TagName, err)
+			logger.Warning("failed to create release for tag '%s': %v", tag.TagName, err)
 			continue
 		}
-		log.Printf("Created release for tag '%s' (%d/%d) in %s", tag.TagName, i+1, len(tags), time.Since(start))
+		logger.Info("Created release for tag '%s' (%d/%d) in %s", tag.TagName, i+1, len(tags), time.Since(start))
 	}
 	return nil
 }
 
 func (r *Repo) Upload(tag string, filenames []string) error {
-	log.Printf("Uploading files for tag '%s'...", tag)
+	logger.Info("Uploading files for tag '%s'...", tag)
 
 	info, err := r.platform.GetTagReleaseInfo(r.ctx, r.fullName, tag)
 	if err != nil {
@@ -204,14 +204,14 @@ func (r *Repo) Upload(tag string, filenames []string) error {
 	}
 
 	if err := r.platform.DeleteReleaseAssets(r.ctx, info, filenames); err != nil {
-		log.Printf("Warning: failed to delete existing assets for tag '%s': %v", tag, err)
+		logger.Warning("failed to delete existing assets for tag '%s': %v", tag, err)
 	}
 
 	if err := r.platform.UploadReleaseAsset(r.ctx, info, filenames); err != nil {
 		return fmt.Errorf("failed to upload assets for tag '%s': %w", tag, err)
 	}
 
-	log.Printf("Upload completed for tag '%s', %d files", tag, len(filenames))
+	logger.Info("Upload completed for tag '%s', %d files", tag, len(filenames))
 	return nil
 }
 
@@ -223,28 +223,28 @@ func (r *Repo) Download(tags []string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create workspace: %w", err)
 	}
-	log.Printf("Downloading releases into workspace: %s", workspace)
+	logger.Info("Downloading releases into workspace: %s", workspace)
 	for i, tag := range tags {
 		start := time.Now()
-		log.Printf("Processing tag '%s' (%d/%d)", tag, i+1, len(tags))
+		logger.Info("Processing tag '%s' (%d/%d)", tag, i+1, len(tags))
 
 		info, err := r.platform.GetTagReleaseInfo(r.ctx, r.fullName, tag)
 		if err != nil {
-			log.Printf("Warning: failed to get release info for tag '%s': %v", tag, err)
+			logger.Warning("get release info for tag '%s': %v", tag, err)
 			continue
 		}
 
 		files, err := info.Download(workspace)
 		if err != nil {
-			log.Printf("Warning: failed to download files for tag '%s': %v", tag, err)
+			logger.Warning("download files for tag '%s': %v", tag, err)
 			continue
 		}
 
-		log.Printf("Downloaded %d files for tag '%s' in %s", len(files), tag, time.Since(start))
+		logger.Info("Downloaded %d files for tag '%s' in %s", len(files), tag, time.Since(start))
 		for _, f := range files {
-			log.Printf("  - %s", f)
+			logger.Info("  - %s", f)
 		}
 	}
-	log.Printf("All downloads completed")
+	logger.Info("All downloads completed")
 	return nil
 }

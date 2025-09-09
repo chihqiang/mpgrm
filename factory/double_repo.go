@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/urfave/cli/v3"
-	"log"
 	"time"
 	"wangzhiqiang/mpgrm/flags"
 	"wangzhiqiang/mpgrm/pkg/credential"
+	"wangzhiqiang/mpgrm/pkg/logger"
 	"wangzhiqiang/mpgrm/pkg/platforms"
 )
 
@@ -94,42 +94,41 @@ func (t *DoubleRepo) ReleaseSync(tags []string) error {
 
 	for i, tag := range tags {
 		start := time.Now()
-		log.Printf("Processing tag %s (%d/%d)", tag, i+1, len(tags))
+		logger.Info("Processing tag %s (%d/%d)", tag, i+1, len(tags))
 
 		// 获取源 Release 信息
 		info, err := t.platform.GetTagReleaseInfo(t.ctx, t.fullName, tag)
 		if err != nil {
-			log.Printf("Warning: failed to get source release info for tag '%s': %v", tag, err)
+			logger.Warning("failed to get source release info for tag '%s': %v", tag, err)
 			continue
 		}
 
 		// 下载源 Release 文件
 		files, err := info.Download(workspace)
 		if err != nil {
-			log.Printf("Warning: failed to download release files for tag '%s': %v", tag, err)
+			logger.Warning("download release files for tag '%s': %v", tag, err)
 			continue
 		}
-		log.Printf("Downloaded %d files for tag '%s' in %s", len(files), tag, time.Since(start))
+		logger.Info("Downloaded %d files for tag '%s' in %s", len(files), tag, time.Since(start))
 
 		// 获取目标 Release，如果不存在则创建
 		releaseInfo, err := t.targetPlatform.GetTagReleaseInfo(t.ctx, t.targetFullName, tag)
 		if err != nil {
 			releaseInfo, err = t.targetPlatform.CreateRelease(t.ctx, t.targetFullName, &platforms.ReleaseInfo{TagName: tag})
 			if err != nil {
-				log.Printf("Warning: failed to create target release for tag '%s': %v", tag, err)
+				logger.Warning("failed to create target release for tag '%s': %v", tag, err)
 				continue
 			}
-			log.Printf("Created target release for tag '%s'", tag)
+			logger.Info("Created target release for tag '%s'", tag)
 		}
 
 		// 上传文件到目标 Release
 		if err := t.targetPlatform.UploadReleaseAsset(t.ctx, releaseInfo, files); err != nil {
-			log.Printf("Warning: failed to upload files to target release for tag '%s': %v", tag, err)
+			logger.Warning("failed to upload files to target release for tag '%s': %v", tag, err)
 			continue
 		}
-		log.Printf("Uploaded %d files to target release for tag '%s'", len(files), tag)
+		logger.Info("Uploaded %d files to target release for tag '%s'", len(files), tag)
 	}
-
-	log.Printf("Release sync completed for %d tags", len(tags))
+	logger.Info("Release sync completed for %d tags", len(tags))
 	return nil
 }
