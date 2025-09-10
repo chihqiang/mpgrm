@@ -58,7 +58,7 @@ func ReleasesCommand() *cli.Command {
 
 					tags := flags.GetTags(cmd)
 					logger.Info("Downloading releases for %d tag(s)...", len(tags))
-					if err := repo.Download(tags); err != nil {
+					if _, err := repo.Download(tags); err != nil {
 						return fmt.Errorf("download failed: %w", err)
 					}
 

@@ -71,7 +71,7 @@ func NewCmdDoubleGit(ctx context.Context, cmd *cli.Command) (*Git, error) {
 	return rt, nil
 }
 
-func (g *Git) getPath() (string, error) {
+func (g *Git) getGitPath() (string, error) {
 	return g.credential.GetCategoryNamWorkspace(credential.WorkspaceCategoryGit, g.workspace)
 }
 
@@ -80,7 +80,7 @@ func (g *Git) Clone() error {
 	migrate := gitx.NewGitMigrate()
 	migrate.WithForm(g.credential)
 	// 获取 workspace
-	workspace, err := g.getPath()
+	workspace, err := g.getGitPath()
 	if err != nil {
 		return err
 	}
@@ -100,7 +100,7 @@ func (g *Git) Push() error {
 	start := time.Now()
 	migrate := gitx.NewGitMigrateDouble(g.credential, g.targetCredential)
 	// 获取 workspace
-	workspace, err := g.getPath()
+	workspace, err := g.getGitPath()
 	if err != nil {
 		return err
 	}

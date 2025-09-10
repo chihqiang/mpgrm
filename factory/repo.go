@@ -217,40 +217,57 @@ func (r *Repo) Upload(tag string, filenames []string) error {
 	return nil
 }
 
-func (r *Repo) Download(tags []string) error {
+func (r *Repo) getReleasePath() (string, error) {
+	return r.credential.GetCategoryNamWorkspace(credential.WorkspaceCategoryReleases, flags.GetWorkspace(r.cmd))
+}
+
+func (r *Repo) Download(tags []string) (map[string][]string, error) {
 	fullName, err := r.credential.GetFullName()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if len(tags) == 0 {
-		return fmt.Errorf("no tags provided for download")
+		return nil, fmt.Errorf("no tags provided for download")
 	}
-	workspace, err := r.credential.GetCategoryNamWorkspace(credential.WorkspaceCategoryReleases, flags.GetWorkspace(r.cmd))
+
+	workspace, err := r.getReleasePath()
 	if err != nil {
-		return fmt.Errorf("failed to create workspace: %w", err)
+		return nil, fmt.Errorf("failed to create workspace: %w", err)
 	}
 	logger.Info("Downloading releases into workspace: %s", workspace)
+	tagFiles := make(map[string][]string)
+	var successCount, failCount int
+	var failedTags []string
+
 	for i, tag := range tags {
 		start := time.Now()
 		logger.Info("Processing tag '%s' (%d/%d)", tag, i+1, len(tags))
 
 		info, err := r.platform.GetTagReleaseInfo(r.ctx, fullName, tag)
 		if err != nil {
-			logger.Warning("get release info for tag '%s': %v", tag, err)
+			logger.Warning("failed to get release info for tag '%s': %v", tag, err)
+			failCount++
+			failedTags = append(failedTags, tag)
 			continue
 		}
-
 		files, err := info.Download(workspace)
 		if err != nil {
-			logger.Warning("download files for tag '%s': %v", tag, err)
+			logger.Warning("failed to download files for tag '%s': %v", tag, err)
+			failCount++
+			failedTags = append(failedTags, tag)
 			continue
 		}
-
+		tagFiles[tag] = files
+		successCount++
 		logger.Info("Downloaded %d files for tag '%s' in %s", len(files), tag, time.Since(start))
 		for _, f := range files {
 			logger.Info("  - %s", f)
 		}
 	}
-	logger.Info("All downloads completed")
-	return nil
+	if failCount > 0 {
+		logger.Warning("Download completed: %d success, %d failed (%v)", successCount, failCount, failedTags)
+	} else {
+		logger.Info("Download completed: %d success, %d failed", successCount, failCount)
+	}
+	return tagFiles, nil
 }

@@ -19,11 +19,9 @@ type DoubleRepo struct {
 
 	platform   platforms.IPlatform    // Source repository platform interface (GitHub, Gitee, Gitea, etc.)
 	credential *credential.Credential // Source repository authentication credential
-	fullName   string                 // Full name of the source repository (owner/repo[/subdir])
 
 	targetPlatform   platforms.IPlatform    // Target repository platform interface
 	targetCredential *credential.Credential // Target repository authentication credential
-	targetFullName   string                 // Full name of the target repository (owner/repo[/subdir])
 }
 
 // NewDoubleRepo initializes a DoubleRepo instance with source and target repository information.
@@ -44,26 +42,12 @@ func NewDoubleRepo(ctx context.Context, cmd *cli.Command) (*DoubleRepo, error) {
 		return rt, err
 	}
 	rt.platform = platform
-	// Parse source repository full name
-	fullName, err := cred.GetFullName()
-	if err != nil {
-		return rt, err
-	}
-	rt.fullName = fullName
-
 	// Get target repository URL and credential
 	targetRepoURL, targetCred, err := flags.GetTargetCredential(cmd)
 	if err != nil {
 		return rt, err
 	}
 	rt.targetCredential = targetCred
-
-	// Parse target repository full name
-	targetFullName, err := targetCred.GetFullName()
-	if err != nil {
-		return rt, err
-	}
-	rt.targetFullName = targetFullName
 
 	// Get target platform interface
 	targetPlatform, err := platforms.GetPlatform(targetRepoURL, targetCred)
@@ -87,48 +71,83 @@ func (t *DoubleRepo) ReleaseSync(tags []string) error {
 		return fmt.Errorf("no tags provided for release sync")
 	}
 
-	workspace, err := t.credential.GetCategoryNamWorkspace(credential.WorkspaceCategoryReleases, flags.GetWorkspace(t.cmd))
+	start := time.Now()
+	var successCount, failCount int
+	var failedTags []string
+
+	targetFullName, err := t.targetCredential.GetFullName()
 	if err != nil {
-		return fmt.Errorf("failed to create workspace: %w", err)
+		return fmt.Errorf("failed to get target full name: %w", err)
 	}
 
 	for i, tag := range tags {
-		start := time.Now()
+		tagStart := time.Now()
 		logger.Info("Processing tag %s (%d/%d)", tag, i+1, len(tags))
 
-		// 获取源 Release 信息
-		info, err := t.platform.GetTagReleaseInfo(t.ctx, t.fullName, tag)
+		// 初始化 repo
+		repo, err := NewRepo(t.ctx, t.cmd)
 		if err != nil {
-			logger.Warning("failed to get source release info for tag '%s': %v", tag, err)
+			logger.Warning("failed to init repo for tag '%s': %v", tag, err)
+			failCount++
+			failedTags = append(failedTags, tag)
+			logger.Info("Tag %s completed with errors, elapsed: %s", tag, time.Since(tagStart))
 			continue
 		}
 
-		// 下载源 Release 文件
-		files, err := info.Download(workspace)
+		mapFiles, err := repo.Download([]string{tag})
 		if err != nil {
-			logger.Warning("download release files for tag '%s': %v", tag, err)
+			logger.Warning("failed to download files for tag '%s': %v", tag, err)
+			failCount++
+			failedTags = append(failedTags, tag)
+			logger.Info("Tag %s completed with errors, elapsed: %s", tag, time.Since(tagStart))
 			continue
 		}
-		logger.Info("Downloaded %d files for tag '%s' in %s", len(files), tag, time.Since(start))
 
-		// 获取目标 Release，如果不存在则创建
-		releaseInfo, err := t.targetPlatform.GetTagReleaseInfo(t.ctx, t.targetFullName, tag)
+		files, ok := mapFiles[tag]
+		if !ok || len(files) == 0 {
+			logger.Warning("no files found for tag '%s'", tag)
+			failCount++
+			failedTags = append(failedTags, tag)
+			logger.Info("Tag %s completed with errors, elapsed: %s", tag, time.Since(tagStart))
+			continue
+		}
+
+		// 获取目标 Release
+		releaseInfo, err := t.targetPlatform.GetTagReleaseInfo(t.ctx, targetFullName, tag)
 		if err != nil {
-			releaseInfo, err = t.targetPlatform.CreateRelease(t.ctx, t.targetFullName, &platforms.ReleaseInfo{TagName: tag})
+			logger.Info("Release for tag '%s' not found, creating...", tag)
+			releaseInfo, err = t.targetPlatform.CreateRelease(t.ctx, targetFullName, &platforms.ReleaseInfo{
+				TagName: tag,
+			})
 			if err != nil {
 				logger.Warning("failed to create target release for tag '%s': %v", tag, err)
+				failCount++
+				failedTags = append(failedTags, tag)
+				logger.Info("Tag %s completed with errors, elapsed: %s", tag, time.Since(tagStart))
 				continue
 			}
 			logger.Info("Created target release for tag '%s'", tag)
 		}
 
-		// 上传文件到目标 Release
+		// 上传文件
 		if err := t.targetPlatform.UploadReleaseAsset(t.ctx, releaseInfo, files); err != nil {
-			logger.Warning("failed to upload files to target release for tag '%s': %v", tag, err)
+			logger.Warning("failed to upload %d files to release for tag '%s': %v", len(files), tag, err)
+			failCount++
+			failedTags = append(failedTags, tag)
+			logger.Info("Tag %s completed with errors, elapsed: %s", tag, time.Since(tagStart))
 			continue
 		}
-		logger.Info("Uploaded %d files to target release for tag '%s'", len(files), tag)
+
+		// 成功日志里带耗时
+		successCount++
+		logger.Info("Uploaded %d files to release for tag '%s', elapsed: %s", len(files), tag, time.Since(tagStart))
 	}
-	logger.Info("Release sync completed for %d tags", len(tags))
+
+	elapsed := time.Since(start)
+	if failCount > 0 {
+		logger.Warning("Release sync completed: %d success, %d failed (%v), total %d tags, total elapsed: %s", successCount, failCount, failedTags, len(tags), elapsed)
+	} else {
+		logger.Info("Release sync completed: %d success, %d failed, total %d tags, total elapsed: %s", successCount, failCount, len(tags), elapsed)
+	}
 	return nil
 }
