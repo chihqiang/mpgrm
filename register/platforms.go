@@ -14,8 +14,8 @@ import (
 )
 
 type HostPlatform struct {
-	Host   string `json:"host"`
-	ApiURL string `json:"api_url"`
+	PlatformHost string `json:"platform_host"`
+	ApiURL       string `json:"api_url"`
 }
 
 // 平台注册信息
@@ -59,7 +59,7 @@ func Platforms(cmd *cli.Command) {
 				if err != nil {
 					continue
 				}
-				if cfg, ok := platformConfigs[apiURL.Host]; ok {
+				if cfg, ok := platformConfigs[hp.PlatformHost]; ok {
 					registerPlatform(apiURL.Host, apiURL.String(), cfg)
 				}
 			}
