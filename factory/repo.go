@@ -158,7 +158,7 @@ func (r *Repo) RepoSync() error {
 					Description: repo.Description,
 					Homepage:    repo.Homepage,
 				}); createErr != nil {
-					logger.Error(" create target repository %s: %v", targetCredential.CloneURL, createErr)
+					logger.Error("create target repository %s: %v", targetCredential.CloneURL, createErr)
 					return
 				}
 			}
