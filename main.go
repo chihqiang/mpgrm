@@ -22,6 +22,7 @@ func init() {
 	commands = append(commands, cmd.PushCommand())
 	commands = append(commands, cmd.ReleasesCommand())
 	commands = append(commands, cmd.RepoCommand())
+	commands = append(commands, cmd.CredentialCommand())
 }
 
 func main() {

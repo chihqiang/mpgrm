@@ -60,7 +60,22 @@ GITHUB_TOKEN="ghp_FAKE1234567890abcdefABCDEFabcdef"
 
 ## 💻 Usage Examples
 
-### 1. Push Repository (push)
+### credential
+
+Manage repository credentials with ease and push anytime
+
+~~~
+# Basic usage
+# Specify the repository URL directly via the command line. 
+# The default behavior (whether to read from environment variables) is controlled by --use-env.
+mpgrm credential show --repo https://github.com/username/source-repo.git
+
+# Specify the repository URL and explicitly disable reading from environment variables.
+# --use-env=false means the command will only use the URL provided via --repo.
+mpgrm credential show --use-env=false --repo https://github.com/username/source-repo.git
+~~~
+
+### Push Repository (push)
 
 Push specified branches and tags from source repository to target repository
 
@@ -75,7 +90,7 @@ mpgrm push --repo https://github.com/username/source-repo.git --target-repo http
 mpgrm push --repo https://github.com/username/source-repo.git --target-repo https://gitee.com/username/target-repo.git --workspace /path/to/workspace
 ```
 
-### 2. Manage Releases (releases)
+### Manage Releases (releases)
 
 #### Upload Release Files
 
@@ -101,7 +116,7 @@ mpgrm releases create --repo https://github.com/username/repo.git
 mpgrm releases sync --repo https://github.com/username/source-repo.git --target-repo https://gitee.com/username/target-repo.git --tags v1.0.0,v1.1.0
 ```
 
-### 3. Manage Repositories (repo)
+### Manage Repositories (repo)
 
 #### List Repositories
 
@@ -137,7 +152,7 @@ mpgrm repo sync --repo https://github.com --target-repo https://gitee.com
 
 CloneURL determines whether it points to an **organization** or a **repository** based on the trailing character.
 
-#### 1. Organization URL (ends with `/`)
+#### Organization URL (ends with `/`)
 
 - Indicates a organization path.
 - The repository name should be appended to generate a full repository URL.
@@ -151,7 +166,7 @@ https://cnb.cool/org1/child1/ -> org1/child1
 https://cnb.cool/org1/child1/child2/ -> org1/child1/child2
 ```
 
-## 2. Personal Homepage or Root URL
+## Personal Homepage or Root URL
 
 - URLs that point to the root of a domain or user homepage.
 - Usually just for reference; no repository is implied.
@@ -165,7 +180,7 @@ https://cnb.cool
 https://cnb.cool/
 ```
 
-#### 3. Repository URL (does not end with `/` or ends with `.git`)
+#### Repository URL (does not end with `/` or ends with `.git`)
 
 ```yml
 https://github.com/org/repo.git

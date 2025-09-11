@@ -32,6 +32,22 @@ type Credential struct {
 	CloneURL string // clone URL
 }
 
+func maskToken(token string) string {
+	length := len(token)
+	if length <= 8 {
+		return strings.Repeat("*", length)
+	}
+	return token[:4] + "****" + token[length-4:]
+}
+
+// 实现 fmt.Stringer 接口
+func (c Credential) String() string {
+	// 脱敏 Token，只显示前 4 位，剩余部分用 * 替代
+	maskedToken := maskToken(c.Token)
+	return fmt.Sprintf("Username: %s, Token: %s, CloneURL: %s",
+		c.Username, maskedToken, c.CloneURL)
+}
+
 // SetCloneByRepoName
 // 当CloneURL为组织的地址时候才去调用补充完整的git地址进行clone
 // SetCloneByRepoName 根据仓库名补充完整的 Git 仓库 CloneURL

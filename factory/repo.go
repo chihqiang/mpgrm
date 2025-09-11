@@ -136,9 +136,11 @@ func (r *Repo) RepoSync() error {
 				logger.Error(err.Error())
 				return
 			}
-			logger.Info("Source URL: %s", cloneURL)
-			logger.Info("Target URL: %s", targetCredential.CloneURL)
 			r.credential.CloneURL = cloneURL
+			logger.Info("Source URL: %s", cloneURL)
+			logger.Info("Source Credential %s", r.credential)
+			logger.Info("Target URL: %s", targetCredential.CloneURL)
+			logger.Info("Target Credential %s", targetCredential)
 			doubleCredentialGit, err := NewDoubleCredentialGit(r.cmd, r.credential, targetCredential)
 			if err != nil {
 				logger.Error("Failed to create Git instance for %s: %v", targetCredential.CloneURL, err)
