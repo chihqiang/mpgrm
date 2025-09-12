@@ -81,11 +81,10 @@ func (p *Platform) CreateRelease(ctx context.Context, fullName string, releaseIn
 	})
 	apiURL := p.GetURLWithToken(fmt.Sprintf("repos/%s/releases", fullName), map[string]string{})
 	var result CreateReleaseResponse
-	_, err := httpx.PostD(ctx, apiURL, bytes.NewBuffer(jsonData), &result, map[string]string{
+	if _, err := httpx.PostD(ctx, apiURL, bytes.NewBuffer(jsonData), &result, map[string]string{
 		"content-type": "application/json;charset=UTF-8",
-	})
-	if err != nil {
-		return nil, er
+	}); err != nil {
+		return nil, err
 	}
 	inf := &platforms.ReleaseInfo{
 		ID:          result.ID,
