@@ -12,15 +12,19 @@ const (
 	FlagsEnvFile   = "env"
 
 	FlagsFormUsername   = "username"
+	FlagsFormPassword   = "password"
 	FlagsFormToken      = "token"
 	FlagsTargetUsername = "target-username"
+	FlagsTargetPassword = "target-password"
 	FlagsTargetToken    = "target-token"
 )
 const (
 	EnvFormUserName = "USERNAME"
+	EnvFormPassword = "PASSWORD"
 	EnvFormToken    = "TOKEN"
 
 	EnvTargetUserName = "TARGET_USERNAME"
+	EnvTargetPassword = "TARGET_PASSWORD"
 	EnvTargetToken    = "TARGET_TOKEN"
 )
 
@@ -45,22 +49,32 @@ func GlobalFlags() []cli.Flag {
 		},
 		&cli.StringFlag{
 			Name:    FlagsFormUsername,
-			Usage:   "The wizard name for your source repo",
-			Sources: cli.EnvVars(EnvFormUserName), // read from environment variable if set
+			Usage:   "Username for authenticating with the source repository",
+			Sources: cli.EnvVars(EnvFormUserName),
+		},
+		&cli.StringFlag{
+			Name:    FlagsFormPassword,
+			Usage:   "Password for authenticating with the source repository",
+			Sources: cli.EnvVars(EnvFormPassword),
 		},
 		&cli.StringFlag{
 			Name:    FlagsFormToken,
-			Usage:   "Secret key or token to tame the source repo",
+			Usage:   "Access token or secret for authenticating with the source repository",
 			Sources: cli.EnvVars(EnvFormToken),
 		},
 		&cli.StringFlag{
 			Name:    FlagsTargetUsername,
-			Usage:   "The hero name for your target repo",
+			Usage:   "Username for authenticating with the target repository",
 			Sources: cli.EnvVars(EnvTargetUserName),
 		},
 		&cli.StringFlag{
+			Name:    FlagsTargetPassword,
+			Usage:   "Password for authenticating with the target repository",
+			Sources: cli.EnvVars(EnvTargetPassword),
+		},
+		&cli.StringFlag{
 			Name:    FlagsTargetToken,
-			Usage:   "Secret key or token to rule the target repo",
+			Usage:   "Access token or secret for authenticating with the target repository",
 			Sources: cli.EnvVars(EnvTargetToken),
 		},
 	}

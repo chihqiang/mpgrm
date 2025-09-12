@@ -85,7 +85,13 @@ func GetFormCredential(cmd *cli.Command, readEnv bool) (*url.URL, *credential.Cr
 	if err != nil {
 		return nil, nil, err
 	}
-	cred, err := credential.GetCredential(repoURL, cmd.String(FlagsFormUsername), cmd.String(FlagsFormToken), readEnv)
+	cred, err := credential.GetCredential(
+		repoURL,
+		cmd.String(FlagsFormUsername),
+		cmd.String(FlagsFormPassword),
+		cmd.String(FlagsFormToken),
+		readEnv,
+	)
 	return repoURL, cred, err
 }
 
@@ -120,7 +126,13 @@ func GetTargetCredential(cmd *cli.Command) (*url.URL, *credential.Credential, er
 	if err != nil {
 		return nil, nil, err
 	}
-	cred, err := credential.GetCredential(repoURL, cmd.String(FlagsTargetUsername), cmd.String(FlagsTargetToken), true)
+	cred, err := credential.GetCredential(
+		repoURL,
+		cmd.String(FlagsTargetUsername),
+		cmd.String(FlagsTargetPassword),
+		cmd.String(FlagsTargetToken),
+		true,
+	)
 	return repoURL, cred, err
 }
 

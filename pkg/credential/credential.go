@@ -29,32 +29,35 @@ type IFormToCredential interface {
 }
 
 type Credential struct {
-	Username string // 用户名或 git
-	Token    string // 认证令牌（Token）
-	CloneURL string // clone URL
+	Username string // 用于 HTTPS 认证的用户名，通常是 git 或你的账号名
+	Password string // 用于 HTTPS 认证的密码（或者 Gitee 账号密码），用于拉取仓库
+	Token    string // 用于 HTTPS 认证的访问令牌（Token），优先于密码
+	CloneURL string // 仓库的克隆地址（HTTPS URL），用于 git clone
 }
 
 func (c *Credential) GetGitAuth() transport.AuthMethod {
-	if c.Username == "" || c.Token == "" {
-		return nil
+	pwd := c.Password
+	if pwd == "" {
+		pwd = c.Token
 	}
-	return &http.BasicAuth{Username: c.Username, Password: c.Token}
-}
-
-func maskToken(token string) string {
-	length := len(token)
-	if length <= 8 {
-		return strings.Repeat("*", length)
+	if c.Username != "" && pwd != "" {
+		return &http.BasicAuth{
+			Username: c.Username,
+			Password: pwd,
+		}
 	}
-	return token[:4] + "****" + token[length-4:]
+	return nil
 }
 
 // 实现 fmt.Stringer 接口
 func (c Credential) String() string {
-	// 脱敏 Token，只显示前 4 位，剩余部分用 * 替代
-	maskedToken := maskToken(c.Token)
-	return fmt.Sprintf("Username: %s, Token: %s, CloneURL: %s",
-		c.Username, maskedToken, c.CloneURL)
+	return fmt.Sprintf(
+		"Username: %s, Password: %s, Token: %s, CloneURL: %s",
+		c.Username,
+		x.HideSensitive(c.Password, 2),
+		x.HideSensitive(c.Token, 3),
+		c.CloneURL,
+	)
 }
 
 // SetCloneByRepoName

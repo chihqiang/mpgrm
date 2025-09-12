@@ -52,3 +52,25 @@ func TestStringSplits(t *testing.T) {
 		})
 	}
 }
+
+func TestHideSensitive(t *testing.T) {
+	tests := []struct {
+		input   string
+		visible int
+		want    string
+	}{
+		{"", 2, ""},                       // 空字符串
+		{"abc", 1, "***"},                 // 短字符串，全遮蔽
+		{"abcdef", 2, "******"},           // 长度等于阈值，全遮蔽
+		{"abcdefgh", 2, "ab****gh"},       // 正常遮蔽，显示前后2个字符
+		{"abcdefghijkl", 3, "abc****jkl"}, // 正常遮蔽，显示前后3个字符
+		{"abcdefgh", 5, "********"},       // l*2 > length，全遮蔽
+	}
+
+	for _, tt := range tests {
+		got := HideSensitive(tt.input, tt.visible)
+		if got != tt.want {
+			t.Errorf("HideSensitive(%q, %d) = %q; want %q", tt.input, tt.visible, got, tt.want)
+		}
+	}
+}
