@@ -6,15 +6,12 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"wangzhiqiang/mpgrm/pkg/credential"
 )
 
 type GitMigrate struct {
-	form     *credential.Credential
-	formAuth *http.BasicAuth
-	target   *credential.Credential
-	toAuth   *http.BasicAuth
+	form   *credential.Credential
+	target *credential.Credential
 }
 
 // NewGitMigrateDouble 创建 GitMigrate 实例并初始化认证
@@ -30,25 +27,11 @@ func NewGitMigrate() *GitMigrate {
 }
 
 func (m *GitMigrate) WithForm(credential *credential.Credential) {
-	var auth *http.BasicAuth
-	if credential != nil && credential.Username != "" && credential.Token != "" {
-		auth = &http.BasicAuth{Username: credential.Username, Password: credential.Token}
-	} else {
-		auth = &http.BasicAuth{}
-	}
 	m.form = credential
-	m.formAuth = auth
 }
 
 func (m *GitMigrate) WithTarget(credential *credential.Credential) {
 	m.target = credential
-	var auth *http.BasicAuth
-	if credential != nil && credential.Username != "" && credential.Token != "" {
-		auth = &http.BasicAuth{Username: credential.Username, Password: credential.Token}
-	} else {
-		auth = &http.BasicAuth{}
-	}
-	m.toAuth = auth
 }
 func (m *GitMigrate) Push(path string) error {
 	// 打开本地仓库
@@ -70,7 +53,7 @@ func (m *GitMigrate) Push(path string) error {
 		RefSpecs: []config.RefSpec{
 			"+refs/heads/*:refs/heads/*", // 推送所有分支
 		},
-		Auth:  m.toAuth,
+		Auth:  m.target.GetGitAuth(),
 		Force: true,
 	})
 	if err != nil && err != git.NoErrAlreadyUpToDate {
@@ -82,7 +65,7 @@ func (m *GitMigrate) Push(path string) error {
 		RefSpecs: []config.RefSpec{
 			"+refs/tags/*:refs/tags/*", // 推送所有 tag
 		},
-		Auth: m.toAuth,
+		Auth: m.target.GetGitAuth(),
 	})
 	if err != nil {
 		if errors.Is(err, git.NoErrAlreadyUpToDate) {
@@ -155,7 +138,7 @@ func (m *GitMigrate) Clone(path string, branches, tags []string) ([]string, []st
 	err = repo.Fetch(&git.FetchOptions{
 		RemoteName: "origin",
 		RefSpecs:   refSpecs,
-		Auth:       m.formAuth,
+		Auth:       m.form.GetGitAuth(),
 	})
 	if err != nil && err != git.NoErrAlreadyUpToDate {
 		return nil, nil, fmt.Errorf("failed target fetch refs: %w", err)
@@ -217,7 +200,7 @@ func (m *GitMigrate) getRemoteBranchAndTag() (branches []string, tags []string, 
 		URLs: []string{m.form.CloneURL},
 	})
 	listOpts := &git.ListOptions{
-		Auth: m.formAuth,
+		Auth: m.form.GetGitAuth(),
 	}
 	refs, err := remote.List(listOpts)
 	if err != nil {

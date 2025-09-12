@@ -2,6 +2,8 @@ package credential
 
 import (
 	"fmt"
+	"github.com/go-git/go-git/v5/plumbing/transport"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"net/url"
 	"os"
 	"path"
@@ -30,6 +32,13 @@ type Credential struct {
 	Username string // 用户名或 git
 	Token    string // 认证令牌（Token）
 	CloneURL string // clone URL
+}
+
+func (c *Credential) GetGitAuth() transport.AuthMethod {
+	if c.Username == "" || c.Token == "" {
+		return nil
+	}
+	return &http.BasicAuth{Username: c.Username, Password: c.Token}
 }
 
 func maskToken(token string) string {

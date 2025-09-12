@@ -19,13 +19,11 @@ func PushCommand() *cli.Command {
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			git, err := factory.NewCmdDoubleGit(ctx, cmd)
 			if err != nil {
-				logger.Error("Failed to create Git instance: %v", err)
 				return err
 			}
 			logger.Info("Starting push operation...")
 			start := time.Now()
 			if err := git.Push(); err != nil {
-				logger.Error("Git push failed: %v", err)
 				return err
 			}
 			elapsed := time.Since(start)
