@@ -4,6 +4,7 @@ go 1.23.12
 
 require (
 	cnb.cool/cnb/sdk/go-cnb v1.0.8
+	cnb.cool/zhiqiangwang/pkg/go-gitee v1.0.0
 	code.gitea.io/sdk/gitea v0.22.0
 	github.com/fatih/color v1.18.0
 	github.com/go-git/go-git/v5 v5.16.2

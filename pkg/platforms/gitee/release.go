@@ -2,6 +2,8 @@ package gitee
 
 import (
 	"bytes"
+	"cnb.cool/zhiqiangwang/pkg/go-gitee/gitee"
+	"cnb.cool/zhiqiangwang/pkg/go-gitee/gitee/types/ibase"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -10,28 +12,29 @@ import (
 	"strings"
 	"wangzhiqiang/mpgrm/pkg/httpx"
 	"wangzhiqiang/mpgrm/pkg/platforms"
+	"wangzhiqiang/mpgrm/pkg/x"
 )
 
 func (p *Platform) ListTags(ctx context.Context, fullName string) ([]*platforms.TagInfo, error) {
+	owner, repo, err := x.RepoParseFullName(fullName)
+	if err != nil {
+		return nil, err
+	}
 	var (
 		allTags []*platforms.TagInfo
 	)
-	err := httpx.Paginate[TagResponse](func(page int) ([]TagResponse, error) {
-		var result []TagResponse
-		apiUrl := p.GetURLWithToken(fmt.Sprintf("/repos/%s/tags", fullName), map[string]string{
-			"page":     fmt.Sprintf("%d", page),
-			"per_page": "10",
+	err = httpx.Paginate[*ibase.Tag](func(page int) ([]*ibase.Tag, error) {
+		client := p.Client()
+		tags, _, err := client.Repositories.GetV5ReposOwnerRepoTags(ctx, owner, repo, &gitee.GetV5ReposOwnerRepoTagsOptions{
+			Page:    page,
+			PerPage: 10,
 		})
-		_, err := httpx.GetD(ctx, apiUrl, &result)
-		if err != nil {
-			return nil, err
-		}
-		return result, nil
-	}, func(item TagResponse) {
+		return tags, err
+	}, func(item *ibase.Tag) {
 		allTags = append(allTags, &platforms.TagInfo{
 			TagName: item.Name,
-			SHA:     item.Commit.Sha,
 		})
+		fmt.Println(item.Name)
 	})
 	return allTags, err
 }

@@ -1,5 +1,7 @@
 cnb.cool/cnb/sdk/go-cnb v1.0.8 h1:SzrQYpYNiQRLo9t4qGroB5InqDWT2ioeuIFbFdOp34I=
 cnb.cool/cnb/sdk/go-cnb v1.0.8/go.mod h1:B9dkmLL6o1p3Ga0zILYKJAHVbcoGE4ATbvoSnzl96ag=
+cnb.cool/zhiqiangwang/pkg/go-gitee v1.0.0 h1:x64vK/bEQ1DsBT6cSyBP/rWhomrioZeg+Ft+rbel+A0=
+cnb.cool/zhiqiangwang/pkg/go-gitee v1.0.0/go.mod h1:t1V3EzFrf9WioYm8iBWaCBl59XfWgNiQzox58kMxn8k=
 code.gitea.io/sdk/gitea v0.22.0 h1:HCKq7bX/HQ85Nw7c/HAhWgRye+vBp5nQOE8Md1+9Ef0=
 code.gitea.io/sdk/gitea v0.22.0/go.mod h1:yyF5+GhljqvA30sRDreoyHILruNiy4ASufugzYg0VHM=
 dario.cat/mergo v1.0.0 h1:AGCNq9Evsj31mOgNPcLyXc+4PNABt905YmuqPYYpBWk=

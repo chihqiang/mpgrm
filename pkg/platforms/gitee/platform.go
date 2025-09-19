@@ -1,6 +1,7 @@
 package gitee
 
 import (
+	"cnb.cool/zhiqiangwang/pkg/go-gitee/gitee"
 	"fmt"
 	"net/url"
 	"wangzhiqiang/mpgrm/pkg/credential"
@@ -27,6 +28,10 @@ func (p *Platform) WithCredential(credential *credential.Credential) error {
 	}
 	p.Credential = credential
 	return nil
+}
+
+func (p *Platform) Client() *gitee.Client {
+	return gitee.NewClient(nil).WithToken(p.Credential.Token)
 }
 
 // GetURLWithToken 构建带 Token 和额外 query 参数的完整 API URL
