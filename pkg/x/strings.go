@@ -13,11 +13,11 @@ func StringSplit(s, sep string) []string {
 			sp = append(sp, trimmed)
 		}
 	}
-	return lo.Uniq(sp)
+	return sp
 }
 
-// StringSplits splits each string in ss by sep and flattens the result
-func StringSplits(ss []string, sep string) []string {
+// StringSplitUniq splits each string in ss by sep and flattens the result
+func StringSplitUniq(ss []string, sep string) []string {
 	var sp []string
 	for _, s := range ss {
 		sp = append(sp, StringSplit(s, sep)...)

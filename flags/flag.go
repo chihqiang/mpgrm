@@ -139,7 +139,7 @@ func GetTargetCredential(cmd *cli.Command) (*url.URL, *credential.Credential, er
 // GetBranches returns a slice of branch names specified in the command flags.
 // Branch names are split by comma.
 func GetBranches(cmd *cli.Command) []string {
-	return x.StringSplits(cmd.StringSlice(FlagsBranches), ",")
+	return x.StringSplitUniq(cmd.StringSlice(FlagsBranches), ",")
 }
 
 // TagsFlags returns tag selection flag.
@@ -155,7 +155,7 @@ func TagsFlags() []cli.Flag {
 // GetTags returns a slice of tag names specified in the command flags.
 // Tag names are split by comma.
 func GetTags(cmd *cli.Command) []string {
-	return x.StringSplits(cmd.StringSlice(FlagsTags), ",")
+	return x.StringSplitUniq(cmd.StringSlice(FlagsTags), ",")
 }
 
 // GetFirstTags returns the first tag from the command flags.
@@ -181,7 +181,7 @@ func FilesFlags() []cli.Flag {
 // GetFiles returns a slice of file paths specified in the command flags.
 // Supports comma-separated input and file pattern matching.
 func GetFiles(cmd *cli.Command) []string {
-	return x.MatchedFiles(x.StringSplits(cmd.StringSlice(FlagsFiles), ","))
+	return x.MatchedFiles(x.StringSplitUniq(cmd.StringSlice(FlagsFiles), ","))
 }
 
 func UseEnvFlags() []cli.Flag {

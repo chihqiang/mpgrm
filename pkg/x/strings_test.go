@@ -6,31 +6,67 @@ import (
 )
 
 func TestStringSplit(t *testing.T) {
-	tests := []struct {
-		name string
-		s    string
-		sep  string
-		want []string
+	testCases := []struct {
+		name     string
+		input    string
+		sep      string
+		expected []string
 	}{
-		{"normal split", "a,b,c", ",", []string{"a", "b", "c"}},
-		{"trim spaces", " a , b ,c ", ",", []string{"a", "b", "c"}},
-		{"empty parts", "a,,b,", ",", []string{"a", "b"}},
-		{"all empty", ", , ", ",", []string{}},
-		{"duplicates", "a,b,a", ",", []string{"a", "b"}},
-		{"no sep", "abc", ",", []string{"abc"}},
+		{
+			name:     "normal split without whitespace",
+			input:    "apple,banana,orange",
+			sep:      ",",
+			expected: []string{"apple", "banana", "orange"},
+		},
+		{
+			name:     "elements with leading/trailing whitespace",
+			input:    "  hello  ,  world  ,  go  ",
+			sep:      ",",
+			expected: []string{"hello", "world", "go"},
+		},
+		{
+			name:     "consecutive separators",
+			input:    "a,,b,,c",
+			sep:      ",",
+			expected: []string{"a", "b", "c"},
+		},
+		{
+			name:     "separators at start and end",
+			input:    ",test,case,",
+			sep:      ",",
+			expected: []string{"test", "case"},
+		},
+		{
+			name:     "no separators present",
+			input:    "hello world",
+			sep:      ",",
+			expected: []string{"hello world"},
+		},
+		{
+			name:     "space as separator",
+			input:    "  a   b  c   ",
+			sep:      " ",
+			expected: []string{"a", "b", "c"},
+		},
+		{
+			name:     "multi-character separator",
+			input:    "x=1&&y=2&&z=3",
+			sep:      "&&",
+			expected: []string{"x=1", "y=2", "z=3"},
+		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := StringSplit(tt.s, tt.sep)
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("StringSplit(%q, %q) = %v, want %v", tt.s, tt.sep, got, tt.want)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			result := StringSplit(tc.input, tc.sep)
+			if !reflect.DeepEqual(result, tc.expected) {
+				t.Errorf("test failed: expected %v, got %v", tc.expected, result)
 			}
 		})
 	}
 }
 
-func TestStringSplits(t *testing.T) {
+func TestStringSplitUniq(t *testing.T) {
 	tests := []struct {
 		name string
 		ss   []string
@@ -45,9 +81,9 @@ func TestStringSplits(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := StringSplits(tt.ss, tt.sep)
+			got := StringSplitUniq(tt.ss, tt.sep)
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("StringSplits(%v, %q) = %v, want %v", tt.ss, tt.sep, got, tt.want)
+				t.Errorf("StringSplitUniq(%v, %q) = %v, want %v", tt.ss, tt.sep, got, tt.want)
 			}
 		})
 	}
