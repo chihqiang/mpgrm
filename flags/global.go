@@ -40,7 +40,7 @@ func GlobalFlags() []cli.Flag {
 		&cli.StringFlag{
 			Name:  FlagsPlatforms,
 			Usage: "Path to the platform mapping file (for private deployments with custom domain mappings)",
-			Value: path.Join(dir, "platform.json"),
+			Value: path.Join(dir, "platforms.json"),
 		},
 		&cli.StringFlag{
 			Name:  FlagsEnvFile,
