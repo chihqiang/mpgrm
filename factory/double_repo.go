@@ -128,6 +128,10 @@ func (t *DoubleRepo) ReleaseSync(tags []string) error {
 			}
 			logger.Info("Created target release for tag '%s'", tag)
 		}
+		//删除通名的文件
+		if err := t.targetPlatform.DeleteReleaseAssets(t.ctx, releaseInfo, files); err != nil {
+			logger.Warning("This is just for deleting duplicate files err %s", err)
+		}
 
 		// 上传文件
 		if err := t.targetPlatform.UploadReleaseAsset(t.ctx, releaseInfo, files); err != nil {
