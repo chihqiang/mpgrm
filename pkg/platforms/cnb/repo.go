@@ -5,9 +5,9 @@ import (
 	"cnb.cool/cnb/sdk/go-cnb/cnb/types/dto"
 	"context"
 	"fmt"
+	"github.com/chihqiang/mpgrm/pkg/httpx"
+	"github.com/chihqiang/mpgrm/pkg/platforms"
 	"strconv"
-	"wangzhiqiang/mpgrm/pkg/httpx"
-	"wangzhiqiang/mpgrm/pkg/platforms"
 )
 
 const VisibilityLevelSecret = "Secret"

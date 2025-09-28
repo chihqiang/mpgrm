@@ -3,12 +3,12 @@ package factory
 import (
 	"context"
 	"fmt"
+	"github.com/chihqiang/mpgrm/flags"
+	"github.com/chihqiang/mpgrm/pkg/credential"
+	"github.com/chihqiang/mpgrm/pkg/logger"
+	"github.com/chihqiang/mpgrm/pkg/platforms"
 	"github.com/urfave/cli/v3"
 	"time"
-	"wangzhiqiang/mpgrm/flags"
-	"wangzhiqiang/mpgrm/pkg/credential"
-	"wangzhiqiang/mpgrm/pkg/logger"
-	"wangzhiqiang/mpgrm/pkg/platforms"
 )
 
 // DoubleRepo represents a repository sync context between a source and a target repository.

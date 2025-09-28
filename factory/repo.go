@@ -3,15 +3,15 @@ package factory
 import (
 	"context"
 	"fmt"
+	"github.com/chihqiang/mpgrm/flags"
+	"github.com/chihqiang/mpgrm/pkg/credential"
+	"github.com/chihqiang/mpgrm/pkg/logger"
+	"github.com/chihqiang/mpgrm/pkg/platforms"
+	"github.com/chihqiang/mpgrm/pkg/x"
 	"github.com/urfave/cli/v3"
 	"net/url"
 	"sync"
 	"time"
-	"wangzhiqiang/mpgrm/flags"
-	"wangzhiqiang/mpgrm/pkg/credential"
-	"wangzhiqiang/mpgrm/pkg/logger"
-	"wangzhiqiang/mpgrm/pkg/platforms"
-	"wangzhiqiang/mpgrm/pkg/x"
 )
 
 // Repo represents a repository with context, CLI command, URL, platform, credentials, and full name.

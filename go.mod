@@ -1,4 +1,4 @@
-module wangzhiqiang/mpgrm
+module github.com/chihqiang/mpgrm
 
 go 1.23.12
 

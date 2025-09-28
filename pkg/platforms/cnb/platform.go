@@ -3,7 +3,7 @@ package cnb
 import (
 	"cnb.cool/cnb/sdk/go-cnb/cnb"
 	"fmt"
-	"wangzhiqiang/mpgrm/pkg/credential"
+	"github.com/chihqiang/mpgrm/pkg/credential"
 )
 
 const (

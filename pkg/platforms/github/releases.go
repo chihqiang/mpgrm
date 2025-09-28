@@ -3,13 +3,13 @@ package github
 import (
 	"context"
 	"fmt"
+	"github.com/chihqiang/mpgrm/pkg/httpx"
+	"github.com/chihqiang/mpgrm/pkg/platforms"
+	"github.com/chihqiang/mpgrm/pkg/x"
 	"github.com/google/go-github/v73/github"
 	"os"
 	"path"
 	"path/filepath"
-	"wangzhiqiang/mpgrm/pkg/httpx"
-	"wangzhiqiang/mpgrm/pkg/platforms"
-	"wangzhiqiang/mpgrm/pkg/x"
 )
 
 func (p *Platform) ListTags(ctx context.Context, fullName string) ([]*platforms.TagInfo, error) {

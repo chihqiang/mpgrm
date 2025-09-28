@@ -3,8 +3,8 @@ package gitee
 import (
 	"cnb.cool/zhiqiangwang/pkg/go-gitee/gitee"
 	"fmt"
+	"github.com/chihqiang/mpgrm/pkg/credential"
 	"net/url"
-	"wangzhiqiang/mpgrm/pkg/credential"
 )
 
 const (

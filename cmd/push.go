@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"context"
+	"github.com/chihqiang/mpgrm/factory"
+	"github.com/chihqiang/mpgrm/flags"
+	"github.com/chihqiang/mpgrm/pkg/logger"
 	"github.com/urfave/cli/v3"
 	"time"
-	"wangzhiqiang/mpgrm/factory"
-	"wangzhiqiang/mpgrm/flags"
-	"wangzhiqiang/mpgrm/pkg/logger"
 )
 
 // PushCommand defines the CLI command to push repositories to the target.

@@ -2,16 +2,16 @@ package register
 
 import (
 	"encoding/json"
+	"github.com/chihqiang/mpgrm/flags"
+	"github.com/chihqiang/mpgrm/pkg/platforms"
+	"github.com/chihqiang/mpgrm/pkg/platforms/cnb"
+	"github.com/chihqiang/mpgrm/pkg/platforms/gitea"
+	"github.com/chihqiang/mpgrm/pkg/platforms/gitee"
+	"github.com/chihqiang/mpgrm/pkg/platforms/github"
 	"github.com/urfave/cli/v3"
 	"net/url"
 	"os"
 	"slices"
-	"wangzhiqiang/mpgrm/flags"
-	"wangzhiqiang/mpgrm/pkg/platforms"
-	"wangzhiqiang/mpgrm/pkg/platforms/cnb"
-	"wangzhiqiang/mpgrm/pkg/platforms/gitea"
-	"wangzhiqiang/mpgrm/pkg/platforms/gitee"
-	"wangzhiqiang/mpgrm/pkg/platforms/github"
 )
 
 type Config struct {

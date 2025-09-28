@@ -3,7 +3,7 @@ package gitea
 import (
 	"code.gitea.io/sdk/gitea"
 	"fmt"
-	"wangzhiqiang/mpgrm/pkg/credential"
+	"github.com/chihqiang/mpgrm/pkg/credential"
 )
 
 const (

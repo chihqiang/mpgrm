@@ -2,8 +2,8 @@ package platforms
 
 import (
 	"fmt"
+	"github.com/chihqiang/mpgrm/pkg/credential"
 	"net/url"
-	"wangzhiqiang/mpgrm/pkg/credential"
 )
 
 var platforms = map[string]func() IPlatform{}

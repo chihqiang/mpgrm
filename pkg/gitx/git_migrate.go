@@ -3,10 +3,10 @@ package gitx
 import (
 	"errors"
 	"fmt"
+	"github.com/chihqiang/mpgrm/pkg/credential"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
-	"wangzhiqiang/mpgrm/pkg/credential"
 )
 
 type GitMigrate struct {

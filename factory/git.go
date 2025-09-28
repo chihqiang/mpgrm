@@ -3,12 +3,12 @@ package factory
 import (
 	"context"
 	"fmt"
+	"github.com/chihqiang/mpgrm/flags"
+	"github.com/chihqiang/mpgrm/pkg/credential"
+	"github.com/chihqiang/mpgrm/pkg/gitx"
+	"github.com/chihqiang/mpgrm/pkg/logger"
 	"github.com/urfave/cli/v3"
 	"time"
-	"wangzhiqiang/mpgrm/flags"
-	"wangzhiqiang/mpgrm/pkg/credential"
-	"wangzhiqiang/mpgrm/pkg/gitx"
-	"wangzhiqiang/mpgrm/pkg/logger"
 )
 
 type Git struct {

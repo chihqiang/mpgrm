@@ -4,12 +4,12 @@ import (
 	"code.gitea.io/sdk/gitea"
 	"context"
 	"fmt"
+	"github.com/chihqiang/mpgrm/pkg/httpx"
+	"github.com/chihqiang/mpgrm/pkg/platforms"
+	"github.com/chihqiang/mpgrm/pkg/x"
 	"os"
 	"path"
 	"path/filepath"
-	"wangzhiqiang/mpgrm/pkg/httpx"
-	"wangzhiqiang/mpgrm/pkg/platforms"
-	"wangzhiqiang/mpgrm/pkg/x"
 )
 
 func (p *Platform) ListTags(ctx context.Context, fullName string) ([]*platforms.TagInfo, error) {

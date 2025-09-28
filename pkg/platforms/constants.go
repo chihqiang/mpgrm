@@ -2,7 +2,7 @@ package platforms
 
 import (
 	"context"
-	"wangzhiqiang/mpgrm/pkg/credential"
+	"github.com/chihqiang/mpgrm/pkg/credential"
 )
 
 type IPlatform interface {

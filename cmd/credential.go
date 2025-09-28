@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"context"
+	"github.com/chihqiang/mpgrm/flags"
+	"github.com/chihqiang/mpgrm/pkg/logger"
 	"github.com/urfave/cli/v3"
-	"wangzhiqiang/mpgrm/flags"
-	"wangzhiqiang/mpgrm/pkg/logger"
 )
 
 func CredentialCommand() *cli.Command {

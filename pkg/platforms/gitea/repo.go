@@ -3,9 +3,9 @@ package gitea
 import (
 	"code.gitea.io/sdk/gitea"
 	"context"
-	"wangzhiqiang/mpgrm/pkg/httpx"
-	"wangzhiqiang/mpgrm/pkg/platforms"
-	"wangzhiqiang/mpgrm/pkg/x"
+	"github.com/chihqiang/mpgrm/pkg/httpx"
+	"github.com/chihqiang/mpgrm/pkg/platforms"
+	"github.com/chihqiang/mpgrm/pkg/x"
 )
 
 func (p *Platform) ListOrgRepo(ctx context.Context, orgName string) ([]*platforms.RepoInfo, error) {

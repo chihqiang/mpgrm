@@ -2,7 +2,7 @@ package platforms
 
 import (
 	"fmt"
-	"wangzhiqiang/mpgrm/pkg/x"
+	"github.com/chihqiang/mpgrm/pkg/x"
 )
 
 // RepoInfo 表示代码托管平台上的仓库信息

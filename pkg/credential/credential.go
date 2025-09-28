@@ -2,13 +2,13 @@ package credential
 
 import (
 	"fmt"
+	"github.com/chihqiang/mpgrm/pkg/x"
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"net/url"
 	"os"
 	"path"
 	"strings"
-	"wangzhiqiang/mpgrm/pkg/x"
 )
 
 // WorkspaceCategory 表示 workspace 下的分类/命名空间层级

@@ -2,10 +2,10 @@ package flags
 
 import (
 	"fmt"
+	"github.com/chihqiang/mpgrm/pkg/credential"
+	"github.com/chihqiang/mpgrm/pkg/x"
 	"github.com/urfave/cli/v3"
 	"net/url"
-	"wangzhiqiang/mpgrm/pkg/credential"
-	"wangzhiqiang/mpgrm/pkg/x"
 )
 
 const (

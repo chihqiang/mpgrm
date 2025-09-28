@@ -3,11 +3,11 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"github.com/chihqiang/mpgrm/factory"
+	"github.com/chihqiang/mpgrm/flags"
+	"github.com/chihqiang/mpgrm/pkg/logger"
 	"github.com/urfave/cli/v3"
 	"time"
-	"wangzhiqiang/mpgrm/factory"
-	"wangzhiqiang/mpgrm/flags"
-	"wangzhiqiang/mpgrm/pkg/logger"
 )
 
 // ReleasesCommand defines the CLI command to manage releases.

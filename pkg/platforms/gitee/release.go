@@ -7,12 +7,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/chihqiang/mpgrm/pkg/httpx"
+	"github.com/chihqiang/mpgrm/pkg/platforms"
+	"github.com/chihqiang/mpgrm/pkg/x"
 	"net/http"
 	"path/filepath"
 	"strings"
-	"wangzhiqiang/mpgrm/pkg/httpx"
-	"wangzhiqiang/mpgrm/pkg/platforms"
-	"wangzhiqiang/mpgrm/pkg/x"
 )
 
 func (p *Platform) ListTags(ctx context.Context, fullName string) ([]*platforms.TagInfo, error) {

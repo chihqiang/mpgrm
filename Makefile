@@ -1,6 +1,6 @@
 VERSION ?= $(shell git describe --tags --always)
 OUTPUT := mpgrm
-MAIN := main.go
+MAIN := cmd/mpgrm/main.go
 IMAGE_NAME := zhiqiangwang/mpgrm
 DOCKER_PLATFORMS := linux/amd64,linux/arm64
 # make build VERSION=v1.0.0

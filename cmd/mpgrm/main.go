@@ -3,14 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/chihqiang/mpgrm/cmd"
+	"github.com/chihqiang/mpgrm/flags"
+	"github.com/chihqiang/mpgrm/pkg/logger"
+	"github.com/chihqiang/mpgrm/register"
 	"github.com/joho/godotenv"
 	"github.com/urfave/cli/v3"
 	"os"
 	"runtime"
-	"wangzhiqiang/mpgrm/cmd"
-	"wangzhiqiang/mpgrm/flags"
-	"wangzhiqiang/mpgrm/pkg/logger"
-	"wangzhiqiang/mpgrm/register"
 )
 
 var (

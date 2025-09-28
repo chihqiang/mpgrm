@@ -3,9 +3,9 @@ package github
 import (
 	"context"
 	"fmt"
+	"github.com/chihqiang/mpgrm/pkg/credential"
 	"github.com/google/go-github/v73/github"
 	"golang.org/x/oauth2"
-	"wangzhiqiang/mpgrm/pkg/credential"
 )
 
 const (

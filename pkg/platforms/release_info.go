@@ -3,11 +3,11 @@ package platforms
 import (
 	"context"
 	"fmt"
+	"github.com/chihqiang/mpgrm/pkg/httpx"
+	"github.com/chihqiang/mpgrm/pkg/x"
 	"golang.org/x/sync/errgroup"
 	"path"
 	"sync"
-	"wangzhiqiang/mpgrm/pkg/httpx"
-	"wangzhiqiang/mpgrm/pkg/x"
 )
 
 type ReleaseInfo struct {
