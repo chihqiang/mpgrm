@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/chihqiang/mpgrm/cmd"
 	"github.com/chihqiang/mpgrm/flags"
-	"github.com/chihqiang/mpgrm/pkg/logger"
+	"github.com/chihqiang/mpgrm/pkg/logx"
 	"github.com/chihqiang/mpgrm/register"
 	"github.com/joho/godotenv"
 	"github.com/urfave/cli/v3"
@@ -41,7 +41,7 @@ func main() {
 	}
 	app.Commands = commands
 	if err := app.Run(context.Background(), os.Args); err != nil {
-		logger.Error(err.Error())
+		logx.Error(err.Error())
 		os.Exit(1)
 	}
 }

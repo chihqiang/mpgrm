@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/chihqiang/mpgrm/factory"
 	"github.com/chihqiang/mpgrm/flags"
-	"github.com/chihqiang/mpgrm/pkg/logger"
+	"github.com/chihqiang/mpgrm/pkg/logx"
 	"github.com/urfave/cli/v3"
 	"time"
 )
@@ -21,13 +21,13 @@ func PushCommand() *cli.Command {
 			if err != nil {
 				return err
 			}
-			logger.Info("Starting push operation...")
+			logx.Info("Starting push operation...")
 			start := time.Now()
 			if err := git.Push(); err != nil {
 				return err
 			}
 			elapsed := time.Since(start)
-			logger.Info("Git push completed successfully, elapsed time: %s", elapsed)
+			logx.Info("Git push completed successfully, elapsed time: %s", elapsed)
 			return nil
 		},
 	}

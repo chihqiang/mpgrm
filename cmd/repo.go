@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/chihqiang/mpgrm/factory"
 	"github.com/chihqiang/mpgrm/flags"
-	"github.com/chihqiang/mpgrm/pkg/logger"
+	"github.com/chihqiang/mpgrm/pkg/logx"
 	"github.com/urfave/cli/v3"
 	"time"
 )
@@ -26,11 +26,11 @@ func RepoCommand() *cli.Command {
 					if err != nil {
 						return err
 					}
-					logger.Info("Repo initialized successfully")
+					logx.Info("Repo initialized successfully")
 					if _, err := repo.ListRepo(); err != nil {
 						return err
 					}
-					logger.Info("Repository listing completed successfully in %s", time.Since(start))
+					logx.Info("Repository listing completed successfully in %s", time.Since(start))
 					return nil
 				},
 			},
@@ -48,7 +48,7 @@ func RepoCommand() *cli.Command {
 						return err
 					}
 					elapsed := time.Since(start)
-					logger.Info("clone completed successfully in %s", elapsed)
+					logx.Info("clone completed successfully in %s", elapsed)
 					return nil
 				},
 			},
@@ -62,11 +62,11 @@ func RepoCommand() *cli.Command {
 					if err != nil {
 						return err
 					}
-					logger.Info("Repo initialized successfully")
+					logx.Info("Repo initialized successfully")
 					if err := repo.RepoSync(); err != nil {
 						return err
 					}
-					logger.Info("RepoSync completed successfully (elapsed: %s)", time.Since(start))
+					logx.Info("RepoSync completed successfully (elapsed: %s)", time.Since(start))
 					return nil
 				},
 			},

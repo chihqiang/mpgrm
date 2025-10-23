@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/chihqiang/mpgrm/flags"
 	"github.com/chihqiang/mpgrm/pkg/credential"
-	"github.com/chihqiang/mpgrm/pkg/logger"
+	"github.com/chihqiang/mpgrm/pkg/logx"
 	"github.com/chihqiang/mpgrm/pkg/platforms"
 	"github.com/urfave/cli/v3"
 	"time"
@@ -82,76 +82,76 @@ func (t *DoubleRepo) ReleaseSync(tags []string) error {
 
 	for i, tag := range tags {
 		tagStart := time.Now()
-		logger.Info("Processing tag %s (%d/%d)", tag, i+1, len(tags))
+		logx.Info("Processing tag %s (%d/%d)", tag, i+1, len(tags))
 
 		// 初始化 repo
 		repo, err := NewRepo(t.ctx, t.cmd)
 		if err != nil {
-			logger.Warning("failed to init repo for tag '%s': %v", tag, err)
+			logx.Warn("failed to init repo for tag '%s': %v", tag, err)
 			failCount++
 			failedTags = append(failedTags, tag)
-			logger.Info("Tag %s completed with errors, elapsed: %s", tag, time.Since(tagStart))
+			logx.Info("Tag %s completed with errors, elapsed: %s", tag, time.Since(tagStart))
 			continue
 		}
 
 		mapFiles, err := repo.Download([]string{tag})
 		if err != nil {
-			logger.Warning("failed to download files for tag '%s': %v", tag, err)
+			logx.Warn("failed to download files for tag '%s': %v", tag, err)
 			failCount++
 			failedTags = append(failedTags, tag)
-			logger.Info("Tag %s completed with errors, elapsed: %s", tag, time.Since(tagStart))
+			logx.Info("Tag %s completed with errors, elapsed: %s", tag, time.Since(tagStart))
 			continue
 		}
 
 		files, ok := mapFiles[tag]
 		if !ok || len(files) == 0 {
-			logger.Warning("no files found for tag '%s'", tag)
+			logx.Warn("no files found for tag '%s'", tag)
 			failCount++
 			failedTags = append(failedTags, tag)
-			logger.Info("Tag %s completed with errors, elapsed: %s", tag, time.Since(tagStart))
+			logx.Info("Tag %s completed with errors, elapsed: %s", tag, time.Since(tagStart))
 			continue
 		}
 
 		// 获取目标 Release
 		releaseInfo, err := t.targetPlatform.GetTagReleaseInfo(t.ctx, targetFullName, tag)
 		if err != nil {
-			logger.Info("Release for tag '%s' not found, creating...", tag)
+			logx.Info("Release for tag '%s' not found, creating...", tag)
 			releaseInfo, err = t.targetPlatform.CreateRelease(t.ctx, targetFullName, &platforms.ReleaseInfo{
 				TagName: tag,
 			})
 			if err != nil {
-				logger.Warning("failed to create target release for tag '%s': %v", tag, err)
+				logx.Warn("failed to create target release for tag '%s': %v", tag, err)
 				failCount++
 				failedTags = append(failedTags, tag)
-				logger.Info("Tag %s completed with errors, elapsed: %s", tag, time.Since(tagStart))
+				logx.Info("Tag %s completed with errors, elapsed: %s", tag, time.Since(tagStart))
 				continue
 			}
-			logger.Info("Created target release for tag '%s'", tag)
+			logx.Info("Created target release for tag '%s'", tag)
 		}
 		//删除通名的文件
 		if err := t.targetPlatform.DeleteReleaseAssets(t.ctx, releaseInfo, files); err != nil {
-			logger.Warning("This is just for deleting duplicate files err %s", err)
+			logx.Warn("This is just for deleting duplicate files err %s", err)
 		}
 
 		// 上传文件
 		if err := t.targetPlatform.UploadReleaseAsset(t.ctx, releaseInfo, files); err != nil {
-			logger.Warning("failed to upload %d files to release for tag '%s': %v", len(files), tag, err)
+			logx.Warn("failed to upload %d files to release for tag '%s': %v", len(files), tag, err)
 			failCount++
 			failedTags = append(failedTags, tag)
-			logger.Info("Tag %s completed with errors, elapsed: %s", tag, time.Since(tagStart))
+			logx.Info("Tag %s completed with errors, elapsed: %s", tag, time.Since(tagStart))
 			continue
 		}
 
 		// 成功日志里带耗时
 		successCount++
-		logger.Info("Uploaded %d files to release for tag '%s', elapsed: %s", len(files), tag, time.Since(tagStart))
+		logx.Info("Uploaded %d files to release for tag '%s', elapsed: %s", len(files), tag, time.Since(tagStart))
 	}
 
 	elapsed := time.Since(start)
 	if failCount > 0 {
-		logger.Warning("Release sync completed: %d success, %d failed (%v), total %d tags, total elapsed: %s", successCount, failCount, failedTags, len(tags), elapsed)
+		logx.Warn("Release sync completed: %d success, %d failed (%v), total %d tags, total elapsed: %s", successCount, failCount, failedTags, len(tags), elapsed)
 	} else {
-		logger.Info("Release sync completed: %d success, %d failed, total %d tags, total elapsed: %s", successCount, failCount, len(tags), elapsed)
+		logx.Info("Release sync completed: %d success, %d failed, total %d tags, total elapsed: %s", successCount, failCount, len(tags), elapsed)
 	}
 	return nil
 }

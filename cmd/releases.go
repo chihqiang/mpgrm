@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/chihqiang/mpgrm/factory"
 	"github.com/chihqiang/mpgrm/flags"
-	"github.com/chihqiang/mpgrm/pkg/logger"
+	"github.com/chihqiang/mpgrm/pkg/logx"
 	"github.com/urfave/cli/v3"
 	"time"
 )
@@ -23,7 +23,7 @@ func ReleasesCommand() *cli.Command {
 				Flags: flags.FormReleaseUploadFiles(),
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					start := time.Now()
-					logger.Info("Starting upload...")
+					logx.Info("Starting upload...")
 					repo, err := factory.NewRepo(ctx, cmd)
 					if err != nil {
 						return fmt.Errorf("failed to initialize repo: %w", err)
@@ -35,12 +35,12 @@ func ReleasesCommand() *cli.Command {
 					}
 
 					files := flags.GetFiles(cmd)
-					logger.Info("Uploading %d files for tag '%s'...", len(files), tag)
+					logx.Info("Uploading %d files for tag '%s'...", len(files), tag)
 					if err := repo.Upload(tag, files); err != nil {
 						return fmt.Errorf("upload failed for tag '%s': %w", tag, err)
 					}
 
-					logger.Info("Upload completed for tag '%s' in %s", tag, time.Since(start))
+					logx.Info("Upload completed for tag '%s' in %s", tag, time.Since(start))
 					return nil
 				},
 			},
@@ -50,19 +50,19 @@ func ReleasesCommand() *cli.Command {
 				Flags: flags.FormReleaseDownload(),
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					start := time.Now()
-					logger.Info("Starting download...")
+					logx.Info("Starting download...")
 					repo, err := factory.NewRepo(ctx, cmd)
 					if err != nil {
 						return fmt.Errorf("failed to initialize repo: %w", err)
 					}
 
 					tags := flags.GetTags(cmd)
-					logger.Info("Downloading releases for %d tag(s)...", len(tags))
+					logx.Info("Downloading releases for %d tag(s)...", len(tags))
 					if _, err := repo.Download(tags); err != nil {
 						return fmt.Errorf("download failed: %w", err)
 					}
 
-					logger.Info("Download completed in %s", time.Since(start))
+					logx.Info("Download completed in %s", time.Since(start))
 					return nil
 				},
 			},
@@ -72,7 +72,7 @@ func ReleasesCommand() *cli.Command {
 				Flags: flags.FormFlags(),
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					start := time.Now()
-					logger.Info("Starting release creation...")
+					logx.Info("Starting release creation...")
 					repo, err := factory.NewRepo(ctx, cmd)
 					if err != nil {
 						return fmt.Errorf("failed to initialize repo: %w", err)
@@ -81,7 +81,7 @@ func ReleasesCommand() *cli.Command {
 					if err := repo.CreateRelease(); err != nil {
 						return fmt.Errorf("release creation failed: %w", err)
 					}
-					logger.Info("All releases created successfully in %s", time.Since(start))
+					logx.Info("All releases created successfully in %s", time.Since(start))
 					return nil
 				},
 			},
@@ -91,18 +91,18 @@ func ReleasesCommand() *cli.Command {
 				Usage: "Sync releases from source repo to target repo",
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					start := time.Now()
-					logger.Info("Starting release sync...")
+					logx.Info("Starting release sync...")
 					target, err := factory.NewDoubleRepo(ctx, cmd)
 					if err != nil {
 						return fmt.Errorf("failed to initialize target repo: %w", err)
 					}
 
 					tags := flags.GetTags(cmd)
-					logger.Info("Syncing releases for %d tag(s)...", len(tags))
+					logx.Info("Syncing releases for %d tag(s)...", len(tags))
 					if err := target.ReleaseSync(tags); err != nil {
 						return fmt.Errorf("release sync failed: %w", err)
 					}
-					logger.Info("Release sync completed in %s", time.Since(start))
+					logx.Info("Release sync completed in %s", time.Since(start))
 					return nil
 				},
 			},

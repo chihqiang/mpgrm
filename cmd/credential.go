@@ -3,7 +3,7 @@ package cmd
 import (
 	"context"
 	"github.com/chihqiang/mpgrm/flags"
-	"github.com/chihqiang/mpgrm/pkg/logger"
+	"github.com/chihqiang/mpgrm/pkg/logx"
 	"github.com/urfave/cli/v3"
 )
 
@@ -23,8 +23,8 @@ func CredentialCommand() *cli.Command {
 					if err != nil {
 						return err
 					}
-					logger.Info("Repository: %s", url)
-					logger.Info("Credential: %s", cred.String())
+					logx.Info("Repository: %s", url)
+					logx.Info("Credential: %s", cred.String())
 					return nil
 				},
 			},

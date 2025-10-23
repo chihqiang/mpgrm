@@ -6,7 +6,7 @@ import (
 	"github.com/chihqiang/mpgrm/flags"
 	"github.com/chihqiang/mpgrm/pkg/credential"
 	"github.com/chihqiang/mpgrm/pkg/gitx"
-	"github.com/chihqiang/mpgrm/pkg/logger"
+	"github.com/chihqiang/mpgrm/pkg/logx"
 	"github.com/urfave/cli/v3"
 	"time"
 )
@@ -84,19 +84,19 @@ func (g *Git) Clone() error {
 	if err != nil {
 		return err
 	}
-	logger.Info("Start cloning repository: %s to local %s", g.credential.CloneURL, workspace)
+	logx.Info("Start cloning repository: %s to local %s", g.credential.CloneURL, workspace)
 	// Clone 仓库并获取实际分支和标签
 	_, _, err = migrate.Clone(workspace, []string{}, []string{})
 	if err != nil {
 		return fmt.Errorf("failed to clone repository: %w", err)
 	}
 	elapsed := time.Since(start)
-	logger.Info("Clone %s completed in %s", g.credential.CloneURL, elapsed)
+	logx.Info("Clone %s completed in %s", g.credential.CloneURL, elapsed)
 	return nil
 }
 
 func (g *Git) Push() error {
-	logger.Info("Starting git sync from %s to %s", g.credential.CloneURL, g.targetCredential.CloneURL)
+	logx.Info("Starting git sync from %s to %s", g.credential.CloneURL, g.targetCredential.CloneURL)
 	start := time.Now()
 	migrate := gitx.NewGitMigrateDouble(g.credential, g.targetCredential)
 	// 获取 workspace
@@ -107,20 +107,20 @@ func (g *Git) Push() error {
 	// 获取分支和标签
 	branches := g.branches
 	tags := g.tags
-	logger.Info("Preparing to clone branches: %v, tags: %v", branches, tags)
+	logx.Info("Preparing to clone branches: %v, tags: %v", branches, tags)
 
 	// Clone 仓库并获取实际分支和标签
 	actualBranches, actualTags, err := migrate.Clone(workspace, branches, tags)
 	if err != nil {
 		return fmt.Errorf("failed to clone repository: %w", err)
 	}
-	logger.Info("Repository cloned successfully. Cloned branches: %v, tags: %v", actualBranches, actualTags)
+	logx.Info("Repository cloned successfully. Cloned branches: %v, tags: %v", actualBranches, actualTags)
 
 	// Push 到目标仓库
 	if err := migrate.Push(workspace); err != nil {
 		return err
 	}
 	elapsed := time.Since(start)
-	logger.Info("Push to target repository completed successfully, total elapsed time: %s", elapsed)
+	logx.Info("Push to target repository completed successfully, total elapsed time: %s", elapsed)
 	return nil
 }
