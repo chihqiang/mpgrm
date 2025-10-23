@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/chihqiang/mpgrm/pkg/httpx"
+	"github.com/chihqiang/mpgrm/pkg/logx"
 	"github.com/chihqiang/mpgrm/pkg/x"
 	"golang.org/x/sync/errgroup"
 	"path"
@@ -49,10 +50,12 @@ func (ri *ReleaseInfo) Download(workspace string) ([]string, error) {
 		g.Go(func() error {
 			mu.Lock()
 			localFile := path.Join(workspace, ri.TagName, asset.Name)
+			logx.Debug("Starting download: %s", asset.URL)
 			if err := httpx.Download(ctx, asset.URL, localFile); err != nil {
 				return fmt.Errorf("failed to download %s: %w", asset.URL, err)
 			}
 			localFileNames = append(localFileNames, localFile)
+			logx.Debug("Download completed: %s", localFile)
 			mu.Unlock()
 			return nil
 		})
